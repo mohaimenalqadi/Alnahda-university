@@ -4,16 +4,25 @@
 // ===========================================
 
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
+    constructor(private reflector: Reflector) { }
+
     /**
      * State-changing HTTP methods that require CSRF protection
      */
     private readonly protectedMethods = ['POST', 'PATCH', 'DELETE', 'PUT'];
 
     canActivate(context: ExecutionContext): boolean {
+        // Check if route has skipCsrf metadata
+        const skipCsrf = this.reflector.get<boolean>('skipCsrf', context.getHandler());
+        if (skipCsrf) {
+            return true;
+        }
+
         const request = context.switchToHttp().getRequest<Request>();
 
         // 1. If method is safe (GET, HEAD, OPTIONS), allow it

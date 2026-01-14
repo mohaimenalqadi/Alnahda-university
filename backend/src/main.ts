@@ -2,7 +2,7 @@
 // Al-Nahda University - Main Application Entry
 // ===========================================
 
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
@@ -70,7 +70,8 @@ async function bootstrap() {
     app.useGlobalFilters(new GlobalExceptionFilter());
 
     // Global CSRF Protection
-    app.useGlobalGuards(new CsrfGuard());
+    const reflector = app.get(Reflector);
+    app.useGlobalGuards(new CsrfGuard(reflector));
 
     // Global interceptors
     app.useGlobalInterceptors(

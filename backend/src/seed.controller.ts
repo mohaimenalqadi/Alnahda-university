@@ -1,12 +1,16 @@
-import { Controller, Post, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Post, HttpCode, HttpStatus, SetMetadata } from '@nestjs/common';
 import { PrismaService } from '@/infrastructure/database/prisma.service';
 import * as argon2 from 'argon2';
+
+export const IS_PUBLIC_KEY = 'isPublic';
+export const SkipCsrf = () => SetMetadata('skipCsrf', true);
 
 @Controller({ version: '1', path: 'seed' })
 export class SeedController {
     constructor(private prisma: PrismaService) { }
 
     @Post()
+    @SkipCsrf()
     @HttpCode(HttpStatus.OK)
     async seed() {
         try {
