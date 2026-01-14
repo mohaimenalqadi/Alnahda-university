@@ -101,7 +101,7 @@ async function bootstrap() {
     // Graceful shutdown
     app.enableShutdownHooks();
 
-    await app.listen(port);
+    await app.listen(port, '0.0.0.0');
 
     console.log(`
 ╔═══════════════════════════════════════════════════════════════╗

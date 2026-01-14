@@ -19,6 +19,29 @@ RUN npx prisma generate
 # Build
 RUN npm run build
 
+# Development stage
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm ci
+
+# Copy source
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Expose port
+EXPOSE 4000
+
+# Start in dev mode
+CMD ["npm", "run", "start:dev"]
+
 # Production stage
 FROM node:20-alpine AS production
 
@@ -49,26 +72,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Start
 CMD ["node", "dist/main.js"]
-
-# Development stage
-FROM node:20-alpine AS development
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install all dependencies
-RUN npm ci
-
-# Copy source
-COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# Expose port
-EXPOSE 4000
-
-# Start in dev mode
-CMD ["npm", "run", "start:dev"]
