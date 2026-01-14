@@ -89,65 +89,65 @@ export default function SemesterFormModal({ isOpen, onClose, semester, locale }:
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose} />
 
-            <div className="relative w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center">
-                            <Calendar className="w-6 h-6 text-blue-500" />
+            <div className="relative w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[20px] md:rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[95vh] flex flex-col">
+                <div className="px-4 md:px-8 py-4 md:py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02] shrink-0">
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center">
+                            <Calendar className="w-5 h-5 md:w-6 md:h-6 text-blue-500" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white uppercase tracking-tight">
+                            <h2 className="text-lg md:text-xl font-bold text-white uppercase tracking-tight">
                                 {semester ? t('editSemester') : t('addSemester')}
                             </h2>
-                            <p className="text-sm text-slate-500">Academic Period Configuration</p>
+                            <p className="text-[10px] md:text-sm text-slate-500 font-medium opacity-60">Academic Period Configuration</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl text-slate-500 hover:text-white transition-colors">
-                        <X className="w-6 h-6" />
+                    <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-white/5 rounded-xl text-slate-500 hover:text-white transition-colors">
+                        <X className="w-5 h-5 md:w-6 md:h-6" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 md:p-8 space-y-5 md:space-y-6 scrollbar-thin scrollbar-thumb-white/5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block text-right">{t('name')} (Ar)</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block text-right">{t('name')} (Ar)</label>
                             <input
                                 required
                                 dir="rtl"
                                 type="text"
                                 value={formData.nameAr}
                                 onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
-                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">{t('name')} (En)</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">{t('name')} (En)</label>
                             <input
                                 required
                                 type="text"
                                 value={formData.nameEn}
                                 onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
-                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">{t('year')}</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">{t('year')}</label>
                             <input
                                 required
                                 type="number"
                                 value={formData.year}
                                 onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">{t('term')}</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">{t('term')}</label>
                             <select
                                 value={formData.term}
                                 onChange={(e) => setFormData({ ...formData, term: e.target.value })}
-                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm cursor-pointer"
                             >
                                 <option value="FALL">FALL</option>
                                 <option value="SPRING">SPRING</option>
@@ -156,24 +156,24 @@ export default function SemesterFormModal({ isOpen, onClose, semester, locale }:
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">{t('startDate')}</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">{t('startDate')}</label>
                             <input
                                 required
                                 type="date"
                                 value={formData.startDate}
                                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">{t('endDate')}</label>
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">{t('endDate')}</label>
                             <input
                                 required
                                 type="date"
                                 value={formData.endDate}
                                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all"
+                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all text-sm"
                             />
                         </div>
                     </div>
@@ -187,18 +187,18 @@ export default function SemesterFormModal({ isOpen, onClose, semester, locale }:
                             className="w-5 h-5 rounded border-white/10 bg-slate-950 text-blue-600 focus:ring-blue-500/50"
                         />
                         <label htmlFor="isActive" className="text-sm font-bold text-white cursor-pointer select-none">
-                            {t('active')} - Set as current active academic period
+                            {t('active')}
                         </label>
                     </div>
 
-                    <div className="pt-6 border-t border-white/5 flex items-center justify-end gap-3">
+                    <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0">
                         <button type="button" onClick={onClose} className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-2xl transition-all">
                             {commonT('cancel')}
                         </button>
                         <button
                             type="submit"
                             disabled={mutation.isPending}
-                            className="flex items-center gap-2 px-10 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-600/20 transition-all hover:scale-[1.02]"
+                            className="flex items-center justify-center gap-2 px-10 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-600/20 transition-all hover:scale-[1.02]"
                         >
                             {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                             {commonT('save')}

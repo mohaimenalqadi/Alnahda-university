@@ -67,18 +67,18 @@ export default function QuickActions({ onAddStudent, onAddSemester, onAddDept, l
     ];
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
             {actions.map((action, i) => (
                 action.onClick ? (
                     <button
                         key={i}
                         onClick={action.onClick}
-                        className="flex flex-col items-center justify-center p-6 bg-slate-900/50 border border-white/5 rounded-3xl hover:border-white/10 hover:bg-white/[0.04] transition-all group"
+                        className="flex flex-col items-center justify-center p-4 sm:p-6 bg-slate-900/50 border border-white/5 rounded-2xl md:rounded-3xl hover:border-white/10 hover:bg-white/[0.04] transition-all group"
                     >
-                        <div className={cn("p-4 rounded-2xl mb-3 group-hover:scale-110 transition-transform", action.bg, action.color)}>
-                            <action.icon className="w-6 h-6" />
+                        <div className={cn("p-3 md:p-4 rounded-xl md:rounded-2xl mb-2 md:mb-3 group-hover:scale-110 transition-transform", action.bg, action.color)}>
+                            <action.icon className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
-                        <span className="text-xs font-bold text-slate-300 group-hover:text-white transition-colors">
+                        <span className="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors text-center">
                             {action.label}
                         </span>
                     </button>
@@ -86,12 +86,12 @@ export default function QuickActions({ onAddStudent, onAddSemester, onAddDept, l
                     <a
                         key={i}
                         href={action.href}
-                        className="flex flex-col items-center justify-center p-6 bg-slate-900/50 border border-white/5 rounded-3xl hover:border-white/10 hover:bg-white/[0.04] transition-all group"
+                        className="flex flex-col items-center justify-center p-4 sm:p-6 bg-slate-900/50 border border-white/5 rounded-2xl md:rounded-3xl hover:border-white/10 hover:bg-white/[0.04] transition-all group"
                     >
-                        <div className={cn("p-4 rounded-2xl mb-3 group-hover:scale-110 transition-transform", action.bg, action.color)}>
-                            <action.icon className="w-6 h-6" />
+                        <div className={cn("p-3 md:p-4 rounded-xl md:rounded-2xl mb-2 md:mb-3 group-hover:scale-110 transition-transform", action.bg, action.color)}>
+                            <action.icon className="w-5 h-5 md:w-6 md:h-6" />
                         </div>
-                        <span className="text-xs font-bold text-slate-300 group-hover:text-white transition-colors">
+                        <span className="text-[10px] md:text-xs font-bold text-slate-300 group-hover:text-white transition-colors text-center">
                             {action.label}
                         </span>
                     </a>

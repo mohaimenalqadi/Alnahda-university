@@ -98,7 +98,7 @@ export default function AuditLogsPage() {
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-slate-900/50 border border-white/5 p-6 rounded-3xl flex flex-wrap items-end gap-6 shadow-xl backdrop-blur-xl">
+            <div className="bg-slate-900/50 border border-white/5 p-4 md:p-6 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-stretch md:items-end gap-4 md:gap-6 shadow-xl backdrop-blur-xl">
                 {/* Action Type Filter */}
                 <div className="flex-1 min-w-[200px] space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
@@ -143,12 +143,12 @@ export default function AuditLogsPage() {
                 </div>
 
                 {/* Date Filter (Static Label for now) */}
-                <div className="flex-1 min-w-[200px] space-y-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                        <Calendar className="w-3.5 h-3.5" />
+                <div className="flex-1 min-w-[150px] space-y-2">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <Calendar className="w-3 h-3" />
                         Date Range
                     </label>
-                    <div className="bg-slate-950/50 border border-white/10 rounded-xl py-2.5 px-4 text-xs text-slate-400 italic">
+                    <div className="bg-slate-950/50 border border-white/10 rounded-xl py-2 px-3 md:py-2.5 md:px-4 text-[10px] md:text-xs text-slate-400 italic">
                         Last 30 Days (Automated)
                     </div>
                 </div>
@@ -163,15 +163,15 @@ export default function AuditLogsPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/5">
                             <table className="w-full text-sm text-left rtl:text-right text-slate-300">
-                                <thead className="bg-white/5 text-slate-400 uppercase text-[10px] font-black tracking-widest">
+                                <thead className="bg-white/5 text-slate-400 uppercase text-[9px] md:text-[10px] font-black tracking-widest">
                                     <tr>
-                                        <th className="px-8 py-5">{t('timestamp')}</th>
-                                        <th className="px-6 py-5">{t('user')}</th>
-                                        <th className="px-6 py-5">{t('action')}</th>
-                                        <th className="px-6 py-5">{t('details')}</th>
-                                        <th className="px-8 py-5 text-right rtl:text-left">{t('ipAddress')}</th>
+                                        <th className="px-4 md:px-8 py-4 md:py-5">{t('timestamp')}</th>
+                                        <th className="px-4 md:px-6 py-4 md:py-5">{t('user')}</th>
+                                        <th className="px-4 md:px-6 py-4 md:py-5">{t('action')}</th>
+                                        <th className="hidden lg:table-cell px-6 py-5">{t('details')}</th>
+                                        <th className="hidden md:table-cell px-8 py-5 text-right rtl:text-left">{t('ipAddress')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
@@ -184,48 +184,48 @@ export default function AuditLogsPage() {
                                     ) : (
                                         logs.map((log: any) => (
                                             <tr key={log.id} className="hover:bg-white/[0.02] transition-colors group">
-                                                <td className="px-8 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                                                <td className="px-4 md:px-8 py-3 md:py-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-2 md:gap-2.5">
+                                                        <Clock className="w-3 md:w-3.5 h-3 md:h-3.5 text-slate-500" />
                                                         <div className="flex flex-col">
-                                                            <span className="font-bold text-emerald-400">
+                                                            <span className="font-bold text-emerald-400 text-xs md:text-sm">
                                                                 {format(new Date(log.createdAt), 'HH:mm:ss')}
                                                             </span>
-                                                            <span className="text-[10px] text-slate-500">
-                                                                {format(new Date(log.createdAt), 'MMM dd, yyyy')}
+                                                            <span className="text-[9px] md:text-[10px] text-slate-500">
+                                                                {format(new Date(log.createdAt), 'MMM dd, yy')}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/5 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                <td className="px-4 md:px-6 py-3 md:py-4">
+                                                    <div className="flex items-center gap-2 md:gap-2.5">
+                                                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-800 border border-white/5 flex items-center justify-center text-[9px] md:text-[10px] font-black text-slate-400 shrink-0">
                                                             {log.adminUser?.email?.charAt(0).toUpperCase()}
                                                         </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="font-bold text-white leading-tight">
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="font-bold text-white leading-tight text-xs md:text-sm truncate">
                                                                 {log.adminUser?.email?.split('@')[0]}
                                                             </span>
-                                                            <span className="text-[10px] text-slate-500 uppercase font-black">
+                                                            <span className="text-[8px] md:text-[10px] text-slate-500 uppercase font-black">
                                                                 {log.adminUser?.role}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/5 w-fit">
+                                                <td className="px-4 md:px-6 py-3 md:py-4">
+                                                    <div className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-white/5 rounded-lg md:rounded-xl border border-white/5 w-fit">
                                                         {getActionIcon(log.action)}
-                                                        <span className="font-bold text-white/90 text-[11px] uppercase tracking-tighter">
+                                                        <span className="font-bold text-white/90 text-[9px] md:text-[11px] uppercase tracking-tighter">
                                                             {getActionLabel(log.action)}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 max-w-xs overflow-hidden text-ellipsis">
+                                                <td className="hidden lg:table-cell px-6 py-4 max-w-xs overflow-hidden text-ellipsis">
                                                     <p className="text-xs text-slate-400 leading-relaxed font-medium">
                                                         {log.details || '---'}
                                                     </p>
                                                 </td>
-                                                <td className="px-8 py-4 text-right rtl:text-left">
+                                                <td className="hidden md:table-cell px-8 py-4 text-right rtl:text-left">
                                                     <div className="flex items-center justify-end gap-1.5 text-slate-500 font-mono text-[10px] font-black">
                                                         <Globe className="w-3 h-3" />
                                                         {log.ipAddress || '127.0.0.1'}

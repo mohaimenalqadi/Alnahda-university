@@ -182,11 +182,11 @@ export default function StudentsPage() {
                     <table className="w-full text-sm text-left rtl:text-right text-slate-300">
                         <thead className="bg-white/5 text-slate-400 uppercase text-xs font-bold tracking-wider">
                             <tr>
-                                <th className="px-6 py-4">{t('registrationNumber')}</th>
-                                <th className="px-6 py-4">{isRTL ? 'الاسم' : 'Name'}</th>
-                                <th className="px-6 py-4">{t('department')}</th>
-                                <th className="px-6 py-4 text-center">{t('status')}</th>
-                                <th className="px-6 py-4 text-center">{t('actions')}</th>
+                                <th className="px-4 md:px-6 py-4 hidden md:table-cell">{t('registrationNumber')}</th>
+                                <th className="px-4 md:px-6 py-4">{isRTL ? 'الاسم' : 'Name'}</th>
+                                <th className="px-4 md:px-6 py-4 hidden lg:table-cell">{t('department')}</th>
+                                <th className="px-4 md:px-6 py-4 text-center">{t('status')}</th>
+                                <th className="px-4 md:px-6 py-4 text-center">{t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -203,18 +203,19 @@ export default function StudentsPage() {
                                         onClick={() => openDetails(student.id)}
                                         className="hover:bg-white/5 transition-colors group cursor-pointer"
                                     >
-                                        <td className="px-6 py-4 font-mono font-medium text-white/90">
+                                        <td className="px-4 md:px-6 py-4 font-mono font-medium text-white/90 hidden md:table-cell">
                                             {student.registrationNumber}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 md:px-6 py-4">
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-white group-hover:text-blue-400 transition-colors">
+                                                <span className="font-bold text-white group-hover:text-blue-400 transition-colors truncate max-w-[150px] md:max-w-none">
                                                     {isRTL ? student.fullNameAr : student.fullNameEn}
                                                 </span>
-                                                <span className="text-xs text-slate-500">{student.email}</span>
+                                                <span className="text-xs text-slate-500 truncate max-w-[150px] md:max-w-none">{student.email}</span>
+                                                <span className="md:hidden text-[10px] text-slate-500 mt-1">#{student.registrationNumber}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 md:px-6 py-4 hidden lg:table-cell">
                                             <div className="flex flex-col">
                                                 <span className="text-white/80">{isRTL ? student.department.nameAr : student.department.nameEn}</span>
                                                 <span className="text-[10px] text-slate-500 bg-white/5 w-fit px-1.5 py-0.5 rounded mt-1 font-bold">
@@ -222,9 +223,9 @@ export default function StudentsPage() {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-center">
+                                        <td className="px-4 md:px-6 py-4 text-center">
                                             <span className={cn(
-                                                "px-2.5 py-1 rounded-full text-xs font-bold tracking-tighter uppercase inline-block",
+                                                "px-2 md:px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold tracking-tighter uppercase inline-block",
                                                 student.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" :
                                                     student.status === 'INACTIVE' ? "bg-slate-500/10 text-slate-500 border border-slate-500/20" :
                                                         student.status === 'EXPELLED' ? "bg-red-500/10 text-red-500 border border-red-500/20" :
@@ -233,24 +234,24 @@ export default function StudentsPage() {
                                                 {t(student.status.toLowerCase() as any)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex items-center justify-center gap-2">
+                                        <td className="px-4 md:px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-center gap-1 md:gap-2">
                                                 <button
                                                     onClick={() => openDetails(student.id)}
-                                                    className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                                                    className="p-1.5 md:p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                                                     title={commonT('view')}
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => openEditForm(student)}
-                                                    className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-400/5 rounded-lg transition-all"
+                                                    className="p-1.5 md:p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-400/5 rounded-lg transition-all"
                                                     title={commonT('edit')}
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
-                                                <div className="w-px h-4 bg-white/10 mx-1" />
-                                                <button className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                                                <div className="hidden md:block w-px h-4 bg-white/10 mx-1" />
+                                                <button className="hidden md:block p-1.5 md:p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                                                     <MoreHorizontal className="w-4 h-4" />
                                                 </button>
                                             </div>

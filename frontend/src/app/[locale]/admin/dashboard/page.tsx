@@ -203,29 +203,29 @@ export default function AdminDashboardPage() {
                             <div className="p-8 text-center text-slate-500">No recent activities</div>
                         ) : (
                             auditLogs?.data.map((log: any, i: number) => (
-                                <div key={i} className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between group">
-                                    <div className="flex items-center gap-4">
+                                <div key={i} className="p-3 md:p-4 hover:bg-white/5 transition-colors flex items-center justify-between group">
+                                    <div className="flex items-center gap-3 md:gap-4 min-w-0">
                                         <div className={cn(
-                                            "w-10 h-10 rounded-xl flex items-center justify-center border border-white/5",
+                                            "w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center border border-white/5 shrink-0",
                                             log.action === 'CREATE' ? "bg-emerald-500/10 text-emerald-500" :
                                                 log.action === 'UPDATE' ? "bg-blue-500/10 text-blue-500" :
                                                     "bg-slate-500/10 text-slate-500"
                                         )}>
-                                            {log.action === 'CREATE' ? <CheckCircle2 className="w-5 h-5" /> :
-                                                log.action === 'UPDATE' ? <Clock className="w-5 h-5" /> :
-                                                    <AlertCircle className="w-5 h-5" />}
+                                            {log.action === 'CREATE' ? <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> :
+                                                log.action === 'UPDATE' ? <Clock className="w-4 h-4 md:w-5 md:h-5" /> :
+                                                    <AlertCircle className="w-4 h-4 md:w-5 md:h-5" />}
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-white">
+                                        <div className="min-w-0">
+                                            <p className="text-xs md:text-sm font-medium text-white truncate">
                                                 <span className="text-blue-400 font-bold">{log.adminUser?.fullName || 'System'}</span>
-                                                {" "}{log.action.toLowerCase()}d a new {log.resource}
+                                                {" "}{log.action.toLowerCase()}d {log.resource.toLowerCase()}
                                             </p>
-                                            <p className="text-xs text-slate-500 mt-0.5">
+                                            <p className="text-[10px] md:text-xs text-slate-500 mt-0.5">
                                                 {formatDate(log.createdAt, locale)}
                                             </p>
                                         </div>
                                     </div>
-                                    <button className="p-2 text-slate-600 hover:text-white opacity-0 group-hover:opacity-100 transition-all">
+                                    <button className="p-2 text-slate-600 hover:text-white opacity-0 group-hover:opacity-100 transition-all shrink-0">
                                         <ArrowUpRight className="w-4 h-4" />
                                     </button>
                                 </div>
