@@ -81,6 +81,8 @@ export class AuthController {
             success: true,
             message: 'تم تسجيل الدخول بنجاح', // Login successful
             student: result.student,
+            accessToken: result.tokens.accessToken,
+            refreshToken: result.tokens.refreshToken,
             expiresIn: result.tokens.expiresIn,
         };
     }

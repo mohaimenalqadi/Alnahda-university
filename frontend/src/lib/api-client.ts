@@ -21,7 +21,6 @@ class ApiClient {
     private refreshFailed = false;
     private lastRefreshStatus: number | null = null;
     private refreshQueue: Array<(success: boolean) => void> = [];
-    private recoveryAttempts = new Map<string, number>();
 
     /**
      * Reset authentication state - call this when user logs in
@@ -48,12 +47,19 @@ class ApiClient {
         }
 
         const url = `${this.baseUrl}${endpoint}`;
+
+        // 1. Get tokens from localStorage for Header Fallback
+        const accessToken = typeof window !== 'undefined' ? localStorage.getItem('student_access_token') : null;
+        const isAdmin = endpoint.includes('/admin') || endpoint.includes('admin/');
+
         const config: RequestInit = {
             ...options,
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': '1',
+                // iOS Fix: If we have a token and it's not an admin request, use the header
+                ...(accessToken && !isAdmin ? { 'Authorization': `Bearer ${accessToken}` } : {}),
                 ...options.headers,
             },
         };
@@ -61,26 +67,8 @@ class ApiClient {
         try {
             const response = await fetch(url, config);
 
-            // Handle 401 and attempt refresh/recovery
+            // Handle 401 and attempt refresh
             if (response.status === 401 && !_isRetry && !endpoint.includes('/refresh') && !endpoint.includes('/login')) {
-                // Specialized iOS/Safari recovery: Check if we have a persistence hint
-                if (typeof window !== 'undefined' && !endpoint.includes('/admin')) {
-                    const hasPersistenceHint = localStorage.getItem('student_session_active') === 'true';
-                    const attempts = this.recoveryAttempts.get(endpoint) || 0;
-
-                    if (hasPersistenceHint && attempts < 1) {
-                        this.recoveryAttempts.set(endpoint, attempts + 1);
-                        console.warn(`[AUTH] iOS Session possible drop detected for ${endpoint}. Attempting 1x persistence recovery.`);
-
-                        // If we're on results page and failing, a hard reload is the most effective iOS fix
-                        if (window.location.pathname.includes('/results')) {
-                            localStorage.setItem('ios_recovery_reload', 'true');
-                            window.location.reload();
-                            return new Promise(() => { }); // Stop execution
-                        }
-                    }
-                }
-
                 // If already refreshing, join the queue
                 if (this.isRefreshing) {
                     return new Promise((resolve, reject) => {
@@ -114,8 +102,10 @@ class ApiClient {
                         // Otherwise (e.g. 500 or network error), allow subsequent retries
                         if (result.status === 401 || result.status === 403) {
                             this.refreshFailed = true;
-                            // Clean up persistence hint on absolute failure
+                            // Clean up tokens on absolute failure
                             if (typeof window !== 'undefined') {
+                                localStorage.removeItem('student_access_token');
+                                localStorage.removeItem('student_refresh_token');
                                 localStorage.removeItem('student_session_active');
                             }
                             // Trigger global redirect if we're in a browser
@@ -135,10 +125,6 @@ class ApiClient {
                 }
             }
 
-            // Successful request - reset recovery attempts for this endpoint
-            if (response.ok) {
-                this.recoveryAttempts.delete(endpoint);
-            }
 
             // Reset failure state on successful login
             if (response.ok && endpoint.includes('/login')) {
@@ -204,17 +190,19 @@ class ApiClient {
                 departmentNameAr: string;
                 departmentNameEn: string;
             };
+            accessToken: string;
+            refreshToken: string;
             expiresIn: number;
         }>('/api/v1/auth/student/login', {
             method: 'POST',
             body: JSON.stringify(data),
         });
 
-        // iOS Fix: Explicitly set a persistence hint in localStorage
-        // This is synchronous and bypasses cookie writing delays/blocks
+        // iOS Fix: Store tokens in localStorage as a fallback to cookies
         if (result.success && typeof window !== 'undefined') {
+            localStorage.setItem('student_access_token', result.accessToken);
+            localStorage.setItem('student_refresh_token', result.refreshToken);
             localStorage.setItem('student_session_active', 'true');
-            localStorage.removeItem('ios_recovery_reload');
         }
 
         return result;
@@ -222,6 +210,8 @@ class ApiClient {
 
     async studentLogout() {
         if (typeof window !== 'undefined') {
+            localStorage.removeItem('student_access_token');
+            localStorage.removeItem('student_refresh_token');
             localStorage.removeItem('student_session_active');
         }
         return this.request<{ success: boolean }>('/api/v1/auth/student/logout', {

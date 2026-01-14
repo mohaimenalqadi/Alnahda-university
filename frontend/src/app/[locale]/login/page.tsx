@@ -50,20 +50,10 @@ export default function LoginPage() {
                 setIsSuccess(true);
                 setStudentName(isRTL ? result.student.fullNameAr : result.student.fullNameEn);
 
-                // iOS/Safari Fix: Give the browser 1.5s to persist cookies before redirecting
+                // Short delay for the animation, then immediate navigation
                 setTimeout(() => {
-                    const targetPath = `/${locale}/results`;
-                    // Attempt soft navigation first
-                    router.push(targetPath);
-
-                    // Fallback: If still on login page after 1s (nav failed), do a hard refresh
-                    setTimeout(() => {
-                        if (window.location.pathname.includes('/login')) {
-                            console.warn('[AUTH] Soft navigation failed, performing hard redirect');
-                            window.location.href = targetPath;
-                        }
-                    }, 1000);
-                }, 1500);
+                    router.push(`/${locale}/results`);
+                }, 1000);
             }
         } catch (err) {
             if (err instanceof ApiRequestError) {
