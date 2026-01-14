@@ -36,7 +36,8 @@ export class JwtAuthService {
     ) {
         this.accessTokenExpiry = this.configService.get<string>('JWT_ACCESS_EXPIRY', '15m');
         this.refreshTokenExpiry = this.configService.get<string>('JWT_REFRESH_EXPIRY', '7d');
-        this.refreshTokenSecret = this.configService.get<string>('JWT_REFRESH_SECRET', '');
+        this.refreshTokenSecret = this.configService.get<string>('JWT_REFRESH_SECRET') ||
+            this.configService.get<string>('JWT_SECRET', 'dev_secret_fallback');
     }
 
     /**
@@ -151,10 +152,10 @@ export class JwtAuthService {
 
         return {
             httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'strict' : 'lax',
+            secure: true, // Always secure in production for cross-site cookies
+            sameSite: isProduction ? 'none' : 'lax', // Use 'none' for cross-site support in production
             maxAge: this.getExpiryInSeconds(expiry) * 1000,
-            path: '/', // Both tokens need to be accessible from all paths
+            path: '/',
         };
     }
 }
