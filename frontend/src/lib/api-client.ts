@@ -411,11 +411,6 @@ class ApiClient {
     async getAdminSemesters() {
         return this.request<any[]>('/api/v1/admin/semesters');
     }
-
-    async getAdminDepartments() {
-        return this.request<any[]>('/api/v1/admin/departments');
-    }
-
     async getAdminCourses(departmentId?: string, semesterLevel?: number) {
         const query = new URLSearchParams();
         if (departmentId) query.append('departmentId', departmentId);

@@ -31,6 +31,7 @@ interface StudentDetailModalProps {
 
 export default function StudentDetailModal({ studentId, isOpen, onClose, locale }: StudentDetailModalProps) {
     const t = useTranslations('admin.students');
+    const commonT = useTranslations('common');
     const isRTL = locale === 'ar';
 
     const { data: student, isLoading } = useQuery({
