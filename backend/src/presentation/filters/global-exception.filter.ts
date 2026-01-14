@@ -59,8 +59,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             }
         } else if (exception instanceof Error) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            message = 'An unexpected error occurred';
-            error = 'Internal Server Error';
+            message = exception.message; // Exposed for debugging
+            error = exception.name;
 
             // Log the actual error for debugging (not exposed to client)
             this.logger.error(
