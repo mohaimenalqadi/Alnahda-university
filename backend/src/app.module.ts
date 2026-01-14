@@ -19,6 +19,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AuditModule } from './modules/audit/audit.module';
 
 import { AppController } from './presentation/controllers/app.controller';
+import { SeedController } from './seed.controller';
 
 @Module({
     imports: [
@@ -61,7 +62,7 @@ import { AppController } from './presentation/controllers/app.controller';
         AdminModule,
         AuditModule,
     ],
-    controllers: [AppController],
+    controllers: [AppController, SeedController],
     providers: [],
 })
 export class AppModule { }
