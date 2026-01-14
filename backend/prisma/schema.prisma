@@ -1,0 +1,377 @@
+// ===========================================
+// Al-Nahda University - Database Schema
+// Enterprise-grade PostgreSQL with Prisma ORM
+// ===========================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// ENUMS
+// ===========================================
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+  SUSPENDED
+  WITHDRAWN
+}
+
+enum SemesterTerm {
+  FALL
+  SPRING
+  SUMMER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  VIEW
+  EXPORT
+}
+
+// ===========================================
+// DEPARTMENT & ACADEMIC STRUCTURE
+// ===========================================
+
+model Department {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique @db.VarChar(20)
+  nameAr    String   @map("name_ar") @db.VarChar(200)
+  nameEn    String   @map("name_en") @db.VarChar(200)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  students Student[]
+  courses  Course[]
+
+  @@map("departments")
+}
+
+model Semester {
+  id        String       @id @default(uuid()) @db.Uuid
+  nameAr    String       @map("name_ar") @db.VarChar(100)
+  nameEn    String       @map("name_en") @db.VarChar(100)
+  year      Int
+  term      SemesterTerm
+  startDate DateTime     @map("start_date") @db.Date
+  endDate   DateTime     @map("end_date") @db.Date
+  isActive  Boolean      @default(false) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  enrollments Enrollment[]
+
+  @@unique([year, term])
+  @@map("semesters")
+}
+
+// ===========================================
+// STUDENT ENTITIES
+// ===========================================
+
+model Student {
+  id           String        @id @default(uuid()) @db.Uuid
+  fullNameAr   String        @map("full_name_ar") @db.VarChar(200)
+  fullNameEn   String        @map("full_name_en") @db.VarChar(200)
+  dateOfBirth  DateTime      @map("date_of_birth") @db.Date
+  email              String?       @unique @db.VarChar(255)
+  registrationNumber String?       @unique @map("registration_number") @db.VarChar(50)
+  departmentId       String        @map("department_id") @db.Uuid
+  academicYear       Int           @map("academic_year")
+  semesterLevel      Int           @default(1) @map("semester_level")
+  status             StudentStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  deletedAt    DateTime?     @map("deleted_at")
+
+  // Relations
+  department  Department          @relation(fields: [departmentId], references: [id])
+  identifiers StudentIdentifier[]
+  enrollments Enrollment[]
+  loginAttempts LoginAttempt[]
+
+  @@index([departmentId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("students")
+}
+
+// Secure identifier storage (hashed registration numbers)
+model StudentIdentifier {
+  id                     String   @id @default(uuid()) @db.Uuid
+  studentId              String   @map("student_id") @db.Uuid
+  registrationNumberHash String   @map("registration_number_hash") @db.VarChar(255)
+  registrationNumberPrefix String @map("registration_number_prefix") @db.VarChar(10) // For display: "2024-***"
+  createdAt              DateTime @default(now()) @map("created_at")
+
+  // Relations
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([registrationNumberHash])
+  @@index([registrationNumberHash])
+  @@map("student_identifiers")
+}
+
+model LoginAttempt {
+  id            String   @id @default(uuid()) @db.Uuid
+  studentId     String?  @map("student_id") @db.Uuid
+  ipAddress     String   @map("ip_address") @db.VarChar(45)
+  userAgent     String?  @map("user_agent") @db.VarChar(500)
+  success       Boolean
+  failureReason String?  @map("failure_reason") @db.VarChar(100)
+  attemptedAt   DateTime @default(now()) @map("attempted_at")
+
+  // Relations
+  student Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([ipAddress])
+  @@index([attemptedAt])
+  @@map("login_attempts")
+}
+
+// ===========================================
+// COURSE & GRADE ENTITIES
+// ===========================================
+
+model Course {
+  id           String   @id @default(uuid()) @db.Uuid
+  code         String   @unique @db.VarChar(20)
+  nameAr       String   @map("name_ar") @db.VarChar(200)
+  nameEn       String   @map("name_en") @db.VarChar(200)
+  departmentId  String   @map("department_id") @db.Uuid
+  semesterLevel Int      @default(1) @map("semester_level")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  department  Department   @relation(fields: [departmentId], references: [id])
+  courseUnits CourseUnit[]
+
+  @@index([departmentId])
+  @@map("courses")
+}
+
+model CourseUnit {
+  id            String   @id @default(uuid()) @db.Uuid
+  courseId      String   @map("course_id") @db.Uuid
+  units         Int      @db.SmallInt
+  maxCoursework Int      @map("max_coursework") @db.SmallInt @default(40)
+  maxFinalExam  Int      @map("max_final_exam") @db.SmallInt @default(60)
+  passingScore  Int      @map("passing_score") @db.SmallInt @default(60)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  course      Course       @relation(fields: [courseId], references: [id])
+  enrollments Enrollment[]
+
+  @@index([courseId])
+  @@map("course_units")
+}
+
+model Enrollment {
+  id           String   @id @default(uuid()) @db.Uuid
+  studentId    String   @map("student_id") @db.Uuid
+  courseUnitId String   @map("course_unit_id") @db.Uuid
+  semesterId   String   @map("semester_id") @db.Uuid
+  enrolledAt   DateTime @default(now()) @map("enrolled_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  student    Student    @relation(fields: [studentId], references: [id])
+  courseUnit CourseUnit @relation(fields: [courseUnitId], references: [id])
+  semester   Semester   @relation(fields: [semesterId], references: [id])
+  grade      Grade?
+
+  @@unique([studentId, courseUnitId, semesterId])
+  @@index([studentId])
+  @@index([semesterId])
+  @@map("enrollments")
+}
+
+model Grade {
+  id              String    @id @default(uuid()) @db.Uuid
+  enrollmentId    String    @unique @map("enrollment_id") @db.Uuid
+  courseworkScore Decimal   @map("coursework_score") @db.Decimal(5, 2)
+  finalExamScore  Decimal   @map("final_exam_score") @db.Decimal(5, 2)
+  totalScore      Decimal   @map("total_score") @db.Decimal(5, 2)
+  letterGrade     String    @map("letter_grade") @db.VarChar(20)
+  gradePoints     Decimal   @map("grade_points") @db.Decimal(3, 2)
+  isPublished     Boolean   @default(false) @map("is_published")
+  createdById     String    @map("created_by_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  publishedAt     DateTime? @map("published_at")
+
+  // Relations
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
+  createdBy  AdminUser  @relation(fields: [createdById], references: [id])
+
+  // Grade history for audit
+  history GradeHistory[]
+
+  @@index([isPublished])
+  @@map("grades")
+}
+
+// Immutable grade history for audit
+model GradeHistory {
+  id              String   @id @default(uuid()) @db.Uuid
+  gradeId         String   @map("grade_id") @db.Uuid
+  courseworkScore Decimal  @map("coursework_score") @db.Decimal(5, 2)
+  finalExamScore  Decimal  @map("final_exam_score") @db.Decimal(5, 2)
+  totalScore      Decimal  @map("total_score") @db.Decimal(5, 2)
+  letterGrade     String   @map("letter_grade") @db.VarChar(20)
+  gradePoints     Decimal  @map("grade_points") @db.Decimal(3, 2)
+  changedById     String   @map("changed_by_id") @db.Uuid
+  changeReason    String?  @map("change_reason") @db.VarChar(500)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  grade     Grade     @relation(fields: [gradeId], references: [id])
+  changedBy AdminUser @relation(fields: [changedById], references: [id])
+
+  @@index([gradeId])
+  @@map("grade_history")
+}
+
+// ===========================================
+// ADMIN & RBAC ENTITIES
+// ===========================================
+
+model AdminUser {
+  id                  String    @id @default(uuid()) @db.Uuid
+  email               String    @unique @db.VarChar(255)
+  passwordHash        String    @map("password_hash") @db.VarChar(255)
+  fullName            String    @map("full_name") @db.VarChar(200)
+  mfaEnabled          Boolean   @default(false) @map("mfa_enabled")
+  mfaSecret           String?   @map("mfa_secret") @db.VarChar(255)
+  isActive            Boolean   @default(true) @map("is_active")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+  lastLoginAt         DateTime? @map("last_login_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  roles         AdminUserRole[]
+  auditLogs     AuditLog[]
+  gradesCreated Grade[]
+  gradeHistory  GradeHistory[]
+  refreshTokens RefreshToken[]
+
+  @@map("admin_users")
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  adminUsers  AdminUserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique @db.VarChar(100)
+  resource  String   @db.VarChar(50)
+  action    String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  roles RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model AdminUserRole {
+  adminUserId String   @map("admin_user_id") @db.Uuid
+  roleId      String   @map("role_id") @db.Uuid
+  assignedAt  DateTime @default(now()) @map("assigned_at")
+
+  // Relations
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  role      Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([adminUserId, roleId])
+  @@map("admin_user_roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ===========================================
+// SECURITY & AUDIT ENTITIES
+// ===========================================
+
+model AuditLog {
+  id            String      @id @default(uuid()) @db.Uuid
+  adminUserId   String?     @map("admin_user_id") @db.Uuid
+  action        AuditAction
+  resource      String      @db.VarChar(50)
+  resourceId    String?     @map("resource_id") @db.VarChar(50)
+  oldValues     Json?       @map("old_values")
+  newValues     Json?       @map("new_values")
+  ipAddress     String      @map("ip_address") @db.VarChar(45)
+  userAgent     String?     @map("user_agent") @db.VarChar(500)
+  correlationId String      @map("correlation_id") @db.VarChar(50)
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  adminUser AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([adminUserId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid()) @db.Uuid
+  adminUserId String    @map("admin_user_id") @db.Uuid
+  tokenHash   String    @map("token_hash") @db.VarChar(255)
+  deviceInfo  String?   @map("device_info") @db.VarChar(500)
+  ipAddress   String    @map("ip_address") @db.VarChar(45)
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  revokedAt   DateTime? @map("revoked_at")
+
+  // Relations
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
