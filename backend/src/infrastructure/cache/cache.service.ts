@@ -12,20 +12,34 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     private client: Redis;
 
     constructor(private readonly configService: ConfigService) {
-        const redisUrl = this.configService.get<string>('REDIS_URL', 'redis://localhost:6379');
-        this.client = new Redis(redisUrl, {
-            maxRetriesPerRequest: 3,
-            lazyConnect: true,
-        });
+        const redisUrl = this.configService.get<string>('REDIS_URL');
+        const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+
+        if (!redisUrl && nodeEnv === 'production') {
+            this.logger.warn('⚠️ No REDIS_URL provided in production. Caching will be disabled.');
+            // We'll create a dummy client that doesn't connect
+            this.client = new Redis({ lazyConnect: true, enableOfflineQueue: false });
+        } else {
+            this.client = new Redis(redisUrl || 'redis://localhost:6379', {
+                maxRetriesPerRequest: 1,
+                lazyConnect: true,
+                reconnectOnError: () => false,
+            });
+        }
     }
 
     async onModuleInit() {
+        const redisUrl = this.configService.get<string>('REDIS_URL');
+        const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+
+        if (!redisUrl && nodeEnv === 'production') return;
+
         try {
             await this.client.connect();
             this.logger.log('✅ Redis connection established');
         } catch (error) {
-            this.logger.error('❌ Redis connection failed', error);
-            // Don't throw - cache is optional, fallback to no-cache
+            this.logger.warn('⚠️ Redis connection failed. Caching will be unavailable but system will continue to work.');
+            // Don't log full error to keep logs clean
         }
     }
 
