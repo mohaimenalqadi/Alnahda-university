@@ -75,38 +75,38 @@ export default function StudentResultsPage() {
             </div>
 
             {/* Student Persona Card */}
-            <div className="relative overflow-hidden bg-slate-900 border border-white/10 rounded-[24px] md:rounded-[40px] p-6 md:p-10 shadow-2xl">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-8">
-                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-[24px] md:rounded-[32px] bg-gradient-to-br from-blue-600 to-indigo-700 p-1 shadow-2xl shadow-blue-600/20">
-                        <div className="w-full h-full rounded-[22px] md:rounded-[30px] bg-slate-950 flex items-center justify-center border border-white/10">
-                            <GraduationCap className="w-10 h-10 md:w-14 md:h-14 text-blue-500" />
+            <div className="relative overflow-hidden bg-slate-900 border border-white/10 rounded-[20px] md:rounded-[40px] p-5 md:p-10 shadow-2xl">
+                <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-blue-600/5 blur-[80px] md:blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="relative flex flex-col md:flex-row items-center gap-5 md:gap-8 text-center md:text-left rtl:md:text-right">
+                    <div className="w-20 h-20 md:w-32 md:h-32 rounded-[20px] md:rounded-[32px] bg-gradient-to-br from-blue-600 to-indigo-700 p-0.5 md:p-1 shadow-xl md:shadow-2xl shadow-blue-600/20 shrink-0">
+                        <div className="w-full h-full rounded-[18px] md:rounded-[30px] bg-slate-950 flex items-center justify-center border border-white/10">
+                            <GraduationCap className="w-8 h-8 md:w-14 md:h-14 text-blue-500" />
                         </div>
                     </div>
-                    <div className="flex-1 text-center md:text-left rtl:md:text-right">
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-3">
-                            <span className="px-2 py-1 bg-blue-500/10 text-blue-500 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest border border-blue-500/20">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-2 md:mb-3">
+                            <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 rounded-full text-[7px] md:text-xs font-black uppercase tracking-widest border border-blue-500/20">
                                 Result Portfolio
                             </span>
-                            <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest border border-emerald-500/20">
+                            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[7px] md:text-xs font-black uppercase tracking-widest border border-emerald-500/20">
                                 {student?.status}
                             </span>
                         </div>
-                        <h1 className="text-2xl md:text-4xl font-black text-white tracking-tight mb-3">
+                        <h1 className="text-xl md:text-4xl font-black text-white tracking-tight mb-2 md:mb-3 truncate">
                             {isRTL ? student?.fullNameAr : student?.fullNameEn}
                         </h1>
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-slate-400 font-medium">
-                            <div className="flex items-center gap-2">
-                                <Hash className="w-3.5 h-3.5 text-blue-500/50" />
-                                <span className="font-mono text-white/90 text-sm md:text-base">{student?.registrationNumber}</span>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-6 text-slate-400 font-medium">
+                            <div className="flex items-center gap-1.5 md:gap-2">
+                                <Hash className="w-3 md:w-3.5 h-3 md:h-3.5 text-blue-500/50" />
+                                <span className="font-mono text-white/90 text-xs md:text-base">{student?.registrationNumber}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Layers className="w-3.5 h-3.5 text-blue-500/50" />
-                                <span className="text-sm md:text-base">{isRTL ? student?.department.nameAr : student?.department.nameEn}</span>
+                            <div className="flex items-center gap-1.5 md:gap-2">
+                                <Layers className="w-3 md:w-3.5 h-3 md:h-3.5 text-blue-500/50" />
+                                <span className="text-xs md:text-base">{isRTL ? student?.department.nameAr : student?.department.nameEn}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-3.5 h-3.5 text-blue-500/50" />
-                                <span className="text-sm md:text-base">{isRTL ? `الفصل الدراسي ${student?.semesterLevel}` : `Level ${student?.semesterLevel}`}</span>
+                            <div className="flex items-center gap-1.5 md:gap-2">
+                                <Clock className="w-3 md:w-3.5 h-3 md:h-3.5 text-blue-500/50" />
+                                <span className="text-xs md:text-base">{isRTL ? `الفصل الدراسي ${student?.semesterLevel}` : `Level ${student?.semesterLevel}`}</span>
                             </div>
                         </div>
                     </div>
@@ -158,41 +158,41 @@ export default function StudentResultsPage() {
 
                         {/* Grades Table */}
                         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/5">
-                            <table className="w-full text-sm text-left rtl:text-right min-w-[700px]">
+                            <table className="w-full text-sm text-left rtl:text-right">
                                 <thead className="bg-white/[0.01] text-slate-500 uppercase text-[9px] md:text-[10px] font-black tracking-widest border-b border-white/5">
                                     <tr>
-                                        <th className="px-5 md:px-8 py-3 md:py-4">Course</th>
-                                        <th className="px-4 md:px-6 py-3 md:py-4 text-center">Units</th>
-                                        <th className="px-4 md:px-6 py-3 md:py-4 text-center">Work</th>
-                                        <th className="px-4 md:px-6 py-3 md:py-4 text-center">Exam</th>
+                                        <th className="px-4 md:px-8 py-3 md:py-4">Course</th>
+                                        <th className="hidden md:table-cell px-4 md:px-6 py-3 md:py-4 text-center">Units</th>
+                                        <th className="hidden lg:table-cell px-4 md:px-6 py-3 md:py-4 text-center">Work</th>
+                                        <th className="hidden lg:table-cell px-4 md:px-6 py-3 md:py-4 text-center">Exam</th>
                                         <th className="px-4 md:px-6 py-3 md:py-4 text-center">Total</th>
-                                        <th className="px-5 md:px-8 py-3 md:py-4 text-center">Grade</th>
+                                        <th className="px-4 md:px-8 py-3 md:py-4 text-center">Grade</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5 font-medium">
                                     {sem.grades.map((grade: any) => (
                                         <tr key={grade.courseId} className="hover:bg-white/[0.01] transition-colors">
-                                            <td className="px-5 md:px-8 py-4 md:py-5">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-white text-sm md:text-base mb-0.5 line-clamp-1">{isRTL ? grade.courseNameAr : grade.courseCode}</span>
-                                                    <span className="text-[10px] text-slate-500 font-mono opacity-60 uppercase">{grade.courseCode}</span>
+                                            <td className="px-4 md:px-8 py-3 md:py-5">
+                                                <div className="flex flex-col min-w-[120px]">
+                                                    <span className="font-bold text-white text-xs md:text-base mb-0.5 md:mb-1 line-clamp-2">{isRTL ? grade.courseNameAr : (grade.courseNameEn || grade.courseCode)}</span>
+                                                    <span className="text-[9px] md:text-[10px] text-slate-500 font-mono opacity-60 uppercase">{grade.courseCode}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-4 md:px-6 py-4 md:py-5 text-center font-black text-slate-400">{grade.units}</td>
-                                            <td className="px-4 md:px-6 py-4 md:py-5 text-center text-slate-400">{grade.courseworkScore}</td>
-                                            <td className="px-4 md:px-6 py-4 md:py-5 text-center text-slate-400">{grade.finalExamScore}</td>
+                                            <td className="hidden md:table-cell px-4 md:px-6 py-4 md:py-5 text-center font-black text-slate-400">{grade.units}</td>
+                                            <td className="hidden lg:table-cell px-4 md:px-6 py-4 md:py-5 text-center text-slate-400">{grade.courseworkScore}</td>
+                                            <td className="hidden lg:table-cell px-4 md:px-6 py-4 md:py-5 text-center text-slate-400">{grade.finalExamScore}</td>
                                             <td className="px-4 md:px-6 py-4 md:py-5 text-center">
-                                                <span className="text-base md:text-lg font-black text-white">{grade.totalScore}</span>
+                                                <span className="text-sm md:text-lg font-black text-white">{grade.totalScore}</span>
                                             </td>
-                                            <td className="px-5 md:px-8 py-4 md:py-5 text-center">
+                                            <td className="px-4 md:px-8 py-4 md:py-5 text-center">
                                                 <div className="flex flex-col items-center">
                                                     <span className={cn(
-                                                        "px-2.5 py-0.5 md:px-3 md:py-1 rounded-lg text-[10px] md:text-xs font-black mb-0.5 tracking-wider",
+                                                        "px-2 py-0.5 md:px-3 md:py-1 rounded-lg text-[9px] md:text-xs font-black mb-0.5 tracking-wider",
                                                         grade.passed ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/10" : "bg-red-500/10 text-red-500 border border-red-500/10"
                                                     )}>
-                                                        {grade.letterGradeAr}
+                                                        {isRTL ? grade.letterGradeAr : grade.letterGradeEn}
                                                     </span>
-                                                    <span className="text-[8px] md:text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
+                                                    <span className="hidden md:block text-[8px] md:text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
                                                         {grade.passed ? 'Success' : 'Failed'}
                                                     </span>
                                                 </div>
