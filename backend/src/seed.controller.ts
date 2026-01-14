@@ -68,19 +68,43 @@ export class SeedController {
     }
 
     private async performSeed() {
+        // Create standard permissions
+        const permissionNames = [
+            'view:dashboard',
+            'manage:students',
+            'manage:grades',
+            'manage:courses',
+            'manage:departments',
+            'manage:settings',
+            'view:audit_logs'
+        ];
+
+        const permissions = await Promise.all(
+            permissionNames.map(name =>
+                this.prisma.permission.upsert({
+                    where: { name },
+                    update: {},
+                    create: { name, description: `Permission to ${name.replace(':', ' ')}` }
+                })
+            )
+        );
 
         // Create departments
         const departments = await Promise.all([
-            this.prisma.department.create({
-                data: {
+            this.prisma.department.upsert({
+                where: { code: 'CS' },
+                update: {},
+                create: {
                     code: 'CS',
                     nameAr: 'علوم الحاسوب',
                     nameEn: 'Computer Science',
                     isActive: true,
                 },
             }),
-            this.prisma.department.create({
-                data: {
+            this.prisma.department.upsert({
+                where: { code: 'IT' },
+                update: {},
+                create: {
                     code: 'IT',
                     nameAr: 'تقنية المعلومات',
                     nameEn: 'Information Technology',
@@ -90,8 +114,10 @@ export class SeedController {
         ]);
 
         // Create semesters
-        const semester = await this.prisma.semester.create({
-            data: {
+        const semester = await this.prisma.semester.upsert({
+            where: { year_term: { year: 2024, term: 'FALL' } },
+            update: {},
+            create: {
                 nameAr: 'الفصل الدراسي الخريفي 2024',
                 nameEn: 'Fall Semester 2024',
                 year: 2024,
@@ -103,16 +129,31 @@ export class SeedController {
         });
 
         // Create admin role and admin user
-        const adminRole = await this.prisma.role.create({
-            data: {
+        const adminRole = await this.prisma.role.upsert({
+            where: { name: 'ADMIN' },
+            update: {},
+            create: {
                 name: 'ADMIN',
                 description: 'System Administrator',
             },
         });
 
+        // Map permissions to role
+        await Promise.all(
+            permissions.map(p =>
+                this.prisma.rolePermission.upsert({
+                    where: { roleId_permissionId: { roleId: adminRole.id, permissionId: p.id } },
+                    update: {},
+                    create: { roleId: adminRole.id, permissionId: p.id }
+                })
+            )
+        );
+
         const adminPassword = await argon2.hash('Admin@123456');
-        const adminUser = await this.prisma.adminUser.create({
-            data: {
+        const adminUser = await this.prisma.adminUser.upsert({
+            where: { email: 'admin@alnahda-university.edu' },
+            update: { passwordHash: adminPassword }, // Update password just in case
+            create: {
                 email: 'admin@alnahda-university.edu',
                 passwordHash: adminPassword,
                 fullName: 'مدير النظام',
@@ -121,8 +162,10 @@ export class SeedController {
             },
         });
 
-        await this.prisma.adminUserRole.create({
-            data: {
+        await this.prisma.adminUserRole.upsert({
+            where: { adminUserId_roleId: { adminUserId: adminUser.id, roleId: adminRole.id } },
+            update: {},
+            create: {
                 adminUserId: adminUser.id,
                 roleId: adminRole.id,
             },
