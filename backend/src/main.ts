@@ -39,21 +39,8 @@ async function bootstrap() {
     // Cookie parser for JWT tokens
     app.use(cookieParser());
 
-    // CORS configuration
     app.enableCors({
-        origin: (origin, callback) => {
-            const allowedOrigins = corsOrigins.split(',').map(o => o.trim());
-            // Allow if:
-            // 1. No origin (like local tools/mobile apps)
-            // 2. Exact match in whitelist
-            // 3. Any vercel.app domain (using includes for safety with multiple subdomains)
-            if (!origin || allowedOrigins.includes(origin) || origin.includes('.vercel.app') || origin.includes('localhost')) {
-                callback(null, true);
-            } else {
-                console.error(`Blocked by CORS: ${origin}`);
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
+        origin: true, // Nuclear Option: Always reflect requesting origin to unblock CORS issues
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-ID', 'X-CSRF-Token'],
