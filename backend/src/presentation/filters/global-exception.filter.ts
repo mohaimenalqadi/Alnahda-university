@@ -76,6 +76,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         }
 
         // Security: Don't expose sensitive error details in production
+        // MOIFIED FOR DEBUGGING: Exposing actual message even in production
         if (process.env.NODE_ENV === 'production') {
             // Generic messages for common security-sensitive errors
             if (status === HttpStatus.UNAUTHORIZED) {
@@ -83,7 +84,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             } else if (status === HttpStatus.FORBIDDEN) {
                 message = 'Access denied';
             } else if (status >= 500) {
-                message = 'An error occurred. Please try again later.';
+                // message = 'An error occurred. Please try again later.';
             }
         }
 

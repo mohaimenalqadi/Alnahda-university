@@ -38,12 +38,13 @@ export class SeedController {
     @HttpCode(HttpStatus.OK)
     async forceSeed() {
         try {
-            // Clear existing data
+            // Clear existing data in correct order (children first)
             await this.prisma.auditLog.deleteMany();
             await this.prisma.gradeHistory.deleteMany();
             await this.prisma.grade.deleteMany();
             await this.prisma.enrollment.deleteMany();
             await this.prisma.studentIdentifier.deleteMany();
+            await this.prisma.loginAttempt.deleteMany(); // Delete attempts before students
             await this.prisma.student.deleteMany();
             await this.prisma.courseUnit.deleteMany();
             await this.prisma.course.deleteMany();
@@ -55,7 +56,6 @@ export class SeedController {
             await this.prisma.permission.deleteMany();
             await this.prisma.role.deleteMany();
             await this.prisma.department.deleteMany();
-            await this.prisma.loginAttempt.deleteMany();
 
             return await this.performSeed();
         } catch (error) {
