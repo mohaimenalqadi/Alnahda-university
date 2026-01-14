@@ -68,153 +68,163 @@ export class SeedController {
     }
 
     private async performSeed() {
-        // Create standard permissions
-        const permissionNames = [
-            'view:dashboard',
-            'manage:students',
-            'manage:grades',
-            'manage:courses',
-            'manage:departments',
-            'manage:settings',
-            'view:audit_logs'
-        ];
+        try {
+            // Create standard permissions
+            const permissionNames = [
+                'view:dashboard',
+                'manage:students',
+                'manage:grades',
+                'manage:courses',
+                'manage:departments',
+                'manage:settings',
+                'view:audit_logs'
+            ];
 
-        const permissions = await Promise.all(
-            permissionNames.map(name =>
-                this.prisma.permission.upsert({
-                    where: { name },
+            const permissions = await Promise.all(
+                permissionNames.map(name =>
+                    this.prisma.permission.upsert({
+                        where: { name },
+                        update: {},
+                        create: {
+                            name,
+                            action: name.split(':')[0],
+                            resource: name.split(':')[1]
+                        }
+                    })
+                )
+            );
+
+            // Create departments
+            const departments = await Promise.all([
+                this.prisma.department.upsert({
+                    where: { code: 'CS' },
                     update: {},
-                    create: { name, description: `Permission to ${name.replace(':', ' ')}` }
-                })
-            )
-        );
+                    create: {
+                        code: 'CS',
+                        nameAr: 'علوم الحاسوب',
+                        nameEn: 'Computer Science',
+                        isActive: true,
+                    },
+                }),
+                this.prisma.department.upsert({
+                    where: { code: 'IT' },
+                    update: {},
+                    create: {
+                        code: 'IT',
+                        nameAr: 'تقنية المعلومات',
+                        nameEn: 'Information Technology',
+                        isActive: true,
+                    },
+                }),
+            ]);
 
-        // Create departments
-        const departments = await Promise.all([
-            this.prisma.department.upsert({
-                where: { code: 'CS' },
+            // Create semesters
+            const semester = await this.prisma.semester.upsert({
+                where: { year_term: { year: 2024, term: 'FALL' } },
                 update: {},
                 create: {
-                    code: 'CS',
-                    nameAr: 'علوم الحاسوب',
-                    nameEn: 'Computer Science',
+                    nameAr: 'الفصل الدراسي الخريفي 2024',
+                    nameEn: 'Fall Semester 2024',
+                    year: 2024,
+                    term: 'FALL',
+                    startDate: new Date('2024-09-01'),
+                    endDate: new Date('2024-12-31'),
                     isActive: true,
                 },
-            }),
-            this.prisma.department.upsert({
-                where: { code: 'IT' },
+            });
+
+            // Create admin role and admin user
+            const adminRole = await this.prisma.role.upsert({
+                where: { name: 'ADMIN' },
                 update: {},
                 create: {
-                    code: 'IT',
-                    nameAr: 'تقنية المعلومات',
-                    nameEn: 'Information Technology',
-                    isActive: true,
+                    name: 'ADMIN',
+                    description: 'System Administrator',
                 },
-            }),
-        ]);
+            });
 
-        // Create semesters
-        const semester = await this.prisma.semester.upsert({
-            where: { year_term: { year: 2024, term: 'FALL' } },
-            update: {},
-            create: {
-                nameAr: 'الفصل الدراسي الخريفي 2024',
-                nameEn: 'Fall Semester 2024',
-                year: 2024,
-                term: 'FALL',
-                startDate: new Date('2024-09-01'),
-                endDate: new Date('2024-12-31'),
-                isActive: true,
-            },
-        });
+            // Map permissions to role
+            await Promise.all(
+                permissions.map(p =>
+                    this.prisma.rolePermission.upsert({
+                        where: { roleId_permissionId: { roleId: adminRole.id, permissionId: p.id } },
+                        update: {},
+                        create: { roleId: adminRole.id, permissionId: p.id }
+                    })
+                )
+            );
 
-        // Create admin role and admin user
-        const adminRole = await this.prisma.role.upsert({
-            where: { name: 'ADMIN' },
-            update: {},
-            create: {
-                name: 'ADMIN',
-                description: 'System Administrator',
-            },
-        });
-
-        // Map permissions to role
-        await Promise.all(
-            permissions.map(p =>
-                this.prisma.rolePermission.upsert({
-                    where: { roleId_permissionId: { roleId: adminRole.id, permissionId: p.id } },
-                    update: {},
-                    create: { roleId: adminRole.id, permissionId: p.id }
-                })
-            )
-        );
-
-        const adminPassword = await argon2.hash('Admin@123456');
-        const adminUser = await this.prisma.adminUser.upsert({
-            where: { email: 'admin@alnahda-university.edu' },
-            update: { passwordHash: adminPassword }, // Update password just in case
-            create: {
-                email: 'admin@alnahda-university.edu',
-                passwordHash: adminPassword,
-                fullName: 'مدير النظام',
-                mfaEnabled: false,
-                isActive: true,
-            },
-        });
-
-        await this.prisma.adminUserRole.upsert({
-            where: { adminUserId_roleId: { adminUserId: adminUser.id, roleId: adminRole.id } },
-            update: {},
-            create: {
-                adminUserId: adminUser.id,
-                roleId: adminRole.id,
-            },
-        });
-
-        // Create sample student
-        const studentPassword = await argon2.hash('ALNAHDA_2024_001234');
-        const student = await this.prisma.student.create({
-            data: {
-                fullNameAr: 'أحمد محمد علي',
-                fullNameEn: 'Ahmed Mohammed Ali',
-                dateOfBirth: new Date('2000-01-15'),
-                email: 'ahmed.ali@student.alnahda.edu',
-                registrationNumber: '2024001234',
-                departmentId: departments[0].id,
-                academicYear: 2024,
-                semesterLevel: 1,
-                status: 'ACTIVE',
-            },
-        });
-
-        await this.prisma.studentIdentifier.create({
-            data: {
-                studentId: student.id,
-                registrationNumberHash: studentPassword,
-                registrationNumberPrefix: '2024-***',
-            },
-        });
-
-        return {
-            success: true,
-            message: 'Database seeded successfully',
-            credentials: {
-                admin: {
+            const adminPassword = await argon2.hash('Admin@123456');
+            const adminUser = await this.prisma.adminUser.upsert({
+                where: { email: 'admin@alnahda-university.edu' },
+                update: { passwordHash: adminPassword }, // Update password just in case
+                create: {
                     email: 'admin@alnahda-university.edu',
-                    password: 'Admin@123456',
+                    passwordHash: adminPassword,
+                    fullName: 'مدير النظام',
+                    mfaEnabled: false,
+                    isActive: true,
                 },
-                student: {
+            });
+
+            await this.prisma.adminUserRole.upsert({
+                where: { adminUserId_roleId: { adminUserId: adminUser.id, roleId: adminRole.id } },
+                update: {},
+                create: {
+                    adminUserId: adminUser.id,
+                    roleId: adminRole.id,
+                },
+            });
+
+            // Create sample student
+            const studentPassword = await argon2.hash('ALNAHDA_2024_001234');
+            const student = await this.prisma.student.upsert({
+                where: { registrationNumber: '2024001234' },
+                update: {},
+                create: {
+                    fullNameAr: 'أحمد محمد علي',
+                    fullNameEn: 'Ahmed Mohammed Ali',
+                    dateOfBirth: new Date('2000-01-15'),
+                    email: 'ahmed.ali@student.alnahda.edu',
                     registrationNumber: '2024001234',
-                    password: 'ALNAHDA_2024_001234',
+                    departmentId: departments[0].id,
+                    academicYear: 2024,
+                    semesterLevel: 1,
+                    status: 'ACTIVE',
                 },
-            },
-        };
-    } catch(error: unknown) {
-        return {
-            success: false,
-            message: 'Seed failed',
-            error: error instanceof Error ? error.message : 'Unknown error occurred',
-        };
+            });
+
+            await this.prisma.studentIdentifier.upsert({
+                where: { registrationNumberHash: studentPassword },
+                update: {},
+                create: {
+                    studentId: student.id,
+                    registrationNumberHash: studentPassword,
+                    registrationNumberPrefix: '2024-***',
+                },
+            });
+
+            return {
+                success: true,
+                message: 'Database seeded successfully',
+                credentials: {
+                    admin: {
+                        email: 'admin@alnahda-university.edu',
+                        password: 'Admin@123456',
+                    },
+                    student: {
+                        registrationNumber: '2024001234',
+                        password: 'ALNAHDA_2024_001234',
+                    },
+                },
+            };
+        } catch (error: unknown) {
+            return {
+                success: false,
+                message: 'Seed failed',
+                error: error instanceof Error ? error.message : 'Unknown error occurred',
+            };
+        }
     }
 }
 

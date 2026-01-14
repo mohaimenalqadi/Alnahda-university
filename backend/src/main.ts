@@ -41,7 +41,18 @@ async function bootstrap() {
 
     // CORS configuration
     app.enableCors({
-        origin: corsOrigins.split(',').map(origin => origin.trim()),
+        origin: (origin, callback) => {
+            const allowedOrigins = corsOrigins.split(',').map(o => o.trim());
+            // Allow if:
+            // 1. No origin (like local tools/mobile apps)
+            // 2. Exact match in whitelist
+            // 3. Any vercel.app subdomain
+            if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Correlation-ID', 'X-CSRF-Token'],
