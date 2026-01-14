@@ -46,10 +46,11 @@ async function bootstrap() {
             // Allow if:
             // 1. No origin (like local tools/mobile apps)
             // 2. Exact match in whitelist
-            // 3. Any vercel.app subdomain
-            if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+            // 3. Any vercel.app domain (using includes for safety with multiple subdomains)
+            if (!origin || allowedOrigins.includes(origin) || origin.includes('.vercel.app') || origin.includes('localhost')) {
                 callback(null, true);
             } else {
+                console.error(`Blocked by CORS: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
