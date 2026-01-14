@@ -21,6 +21,7 @@ class ApiClient {
     private refreshFailed = false;
     private lastRefreshStatus: number | null = null;
     private refreshQueue: Array<(success: boolean) => void> = [];
+    private recoveryAttempts = new Map<string, number>();
 
     /**
      * Reset authentication state - call this when user logs in
@@ -60,8 +61,26 @@ class ApiClient {
         try {
             const response = await fetch(url, config);
 
-            // Handle 401 and attempt refresh
+            // Handle 401 and attempt refresh/recovery
             if (response.status === 401 && !_isRetry && !endpoint.includes('/refresh') && !endpoint.includes('/login')) {
+                // Specialized iOS/Safari recovery: Check if we have a persistence hint
+                if (typeof window !== 'undefined' && !endpoint.includes('/admin')) {
+                    const hasPersistenceHint = localStorage.getItem('student_session_active') === 'true';
+                    const attempts = this.recoveryAttempts.get(endpoint) || 0;
+
+                    if (hasPersistenceHint && attempts < 1) {
+                        this.recoveryAttempts.set(endpoint, attempts + 1);
+                        console.warn(`[AUTH] iOS Session possible drop detected for ${endpoint}. Attempting 1x persistence recovery.`);
+
+                        // If we're on results page and failing, a hard reload is the most effective iOS fix
+                        if (window.location.pathname.includes('/results')) {
+                            localStorage.setItem('ios_recovery_reload', 'true');
+                            window.location.reload();
+                            return new Promise(() => { }); // Stop execution
+                        }
+                    }
+                }
+
                 // If already refreshing, join the queue
                 if (this.isRefreshing) {
                     return new Promise((resolve, reject) => {
@@ -95,6 +114,10 @@ class ApiClient {
                         // Otherwise (e.g. 500 or network error), allow subsequent retries
                         if (result.status === 401 || result.status === 403) {
                             this.refreshFailed = true;
+                            // Clean up persistence hint on absolute failure
+                            if (typeof window !== 'undefined') {
+                                localStorage.removeItem('student_session_active');
+                            }
                             // Trigger global redirect if we're in a browser
                             if (typeof window !== 'undefined') {
                                 const event = new CustomEvent('auth-unauthorized', {
@@ -110,6 +133,11 @@ class ApiClient {
                     // Don't set refreshFailed = true on network errors
                     this.processQueue(false);
                 }
+            }
+
+            // Successful request - reset recovery attempts for this endpoint
+            if (response.ok) {
+                this.recoveryAttempts.delete(endpoint);
             }
 
             // Reset failure state on successful login
@@ -165,7 +193,7 @@ class ApiClient {
 
     // Auth endpoints
     async studentLogin(data: { registrationNumber: string; dateOfBirth: string }) {
-        return this.request<{
+        const result = await this.request<{
             success: boolean;
             message: string;
             student: {
@@ -181,9 +209,21 @@ class ApiClient {
             method: 'POST',
             body: JSON.stringify(data),
         });
+
+        // iOS Fix: Explicitly set a persistence hint in localStorage
+        // This is synchronous and bypasses cookie writing delays/blocks
+        if (result.success && typeof window !== 'undefined') {
+            localStorage.setItem('student_session_active', 'true');
+            localStorage.removeItem('ios_recovery_reload');
+        }
+
+        return result;
     }
 
     async studentLogout() {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('student_session_active');
+        }
         return this.request<{ success: boolean }>('/api/v1/auth/student/logout', {
             method: 'POST',
         });

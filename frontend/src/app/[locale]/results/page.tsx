@@ -83,6 +83,20 @@ export default function ResultsPage() {
         }
     }, [currentSemester]);
 
+    const [isRecovering, setIsRecovering] = useState(false);
+
+    // Initial session recovery check for iOS
+    useEffect(() => {
+        if (typeof window !== 'undefined' && localStorage.getItem('ios_recovery_reload') === 'true') {
+            setIsRecovering(true);
+            // Clear flag after a short delay to allow UI to show
+            setTimeout(() => {
+                localStorage.removeItem('ios_recovery_reload');
+                setIsRecovering(false);
+            }, 2000);
+        }
+    }, []);
+
     const handleLogout = async () => {
         try {
             await api.studentLogout();
@@ -102,12 +116,21 @@ export default function ResultsPage() {
         router.push(`/${newLocale}/results`);
     };
 
-    if (profileLoading || resultsLoading) {
+    if (profileLoading || resultsLoading || isRecovering) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-primary-600 mx-auto mb-4" />
-                    <p className="text-gray-600">{t('common.loading')}</p>
+                    <p className="text-gray-600 font-bold">
+                        {isRecovering
+                            ? (isRTL ? 'جاري مزامنة الجلسة...' : 'Synchronizing session...')
+                            : t('common.loading')}
+                    </p>
+                    {isRecovering && (
+                        <p className="text-[10px] text-slate-400 mt-2 uppercase tracking-widest animate-pulse">
+                            {isRTL ? 'إعداد الوصول الآمن لأجهزة iOS' : 'Optimizing secure access for iOS'}
+                        </p>
+                    )}
                 </div>
             </div>
         );
