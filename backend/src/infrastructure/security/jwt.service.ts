@@ -147,13 +147,16 @@ export class JwtAuthService {
         maxAge: number;
         path: string;
     } {
-        const isProduction = this.configService.get('NODE_ENV') === 'production';
+        const nodeEnv = this.configService.get('NODE_ENV');
+        const isProduction = nodeEnv === 'production' || nodeEnv === 'staging';
         const expiry = type === 'access' ? this.accessTokenExpiry : this.refreshTokenExpiry;
 
         return {
             httpOnly: true,
-            secure: true, // Always secure in production for cross-site cookies
-            sameSite: isProduction ? 'none' : 'lax', // Use 'none' for cross-site support in production
+            // Secure must be true for sameSite: 'none'
+            secure: true,
+            // iOS/Safari fix: use 'none' for production cross-site, 'lax' for local dev
+            sameSite: isProduction ? 'none' : 'lax',
             maxAge: this.getExpiryInSeconds(expiry) * 1000,
             path: '/',
         };

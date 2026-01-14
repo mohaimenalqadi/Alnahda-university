@@ -23,7 +23,9 @@ export default function LoginPage() {
     const isRTL = locale === 'ar';
 
     const [isLoading, setIsLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [studentName, setStudentName] = useState<string | null>(null);
 
     const {
         register,
@@ -45,7 +47,23 @@ export default function LoginPage() {
             const result = await api.studentLogin(data);
 
             if (result.success) {
-                router.push(`/${locale}/results`);
+                setIsSuccess(true);
+                setStudentName(isRTL ? result.student.fullNameAr : result.student.fullNameEn);
+
+                // iOS/Safari Fix: Give the browser 1.5s to persist cookies before redirecting
+                setTimeout(() => {
+                    const targetPath = `/${locale}/results`;
+                    // Attempt soft navigation first
+                    router.push(targetPath);
+
+                    // Fallback: If still on login page after 1s (nav failed), do a hard refresh
+                    setTimeout(() => {
+                        if (window.location.pathname.includes('/login')) {
+                            console.warn('[AUTH] Soft navigation failed, performing hard redirect');
+                            window.location.href = targetPath;
+                        }
+                    }, 1000);
+                }, 1500);
             }
         } catch (err) {
             if (err instanceof ApiRequestError) {
@@ -97,22 +115,48 @@ export default function LoginPage() {
                 <div className="w-full max-w-[480px] animate-fade-in">
                     {/* Logo & Header */}
                     <div className="text-center mb-6 md:mb-10">
-                        <div className="inline-flex items-center justify-center w-20 h-20 md:w-28 md:h-28 
-                          bg-gradient-gold rounded-[1.5rem] md:rounded-[2.5rem] shadow-gold mb-4 md:mb-6 p-0.5 transform rotate-3 hover:rotate-0 transition-transform duration-500 shrink-0">
-                            <div className="w-full h-full bg-white rounded-[1.4rem] md:rounded-[2.4rem] flex items-center justify-center">
-                                <GraduationCap className="w-10 h-10 md:w-14 md:h-14 text-primary-500" />
+                        {isSuccess ? (
+                            <div className="animate-bounce-in">
+                                <div className="inline-flex items-center justify-center w-20 h-20 md:w-28 md:h-28 
+                                  bg-emerald-500 rounded-[1.5rem] md:rounded-[2.5rem] shadow-lg shadow-emerald-500/20 mb-4 md:mb-6 p-0.5">
+                                    <div className="w-full h-full bg-white rounded-[1.4rem] md:rounded-[2.4rem] flex items-center justify-center">
+                                        <div className="w-10 h-10 md:w-14 md:h-14 bg-emerald-50 rounded-full flex items-center justify-center">
+                                            <svg className="w-6 h-6 md:w-8 md:h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h1 className="text-2xl md:text-3xl font-black text-slate-900 mb-2">
+                                    {isRTL ? 'أهلاً بك' : 'Welcome back'}
+                                </h1>
+                                <p className="text-emerald-600 font-bold bg-emerald-50 inline-block px-4 py-1.5 rounded-full text-xs md:text-sm">
+                                    {studentName}
+                                </p>
                             </div>
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-black mb-2 md:mb-3 tracking-tight">
-                            <span className="text-gold">{t('common.appName')}</span>
-                        </h1>
-                        <p className="text-slate-400 text-sm md:text-lg font-medium opacity-80">
-                            {t('login.subtitle')}
-                        </p>
+                        ) : (
+                            <>
+                                <div className="inline-flex items-center justify-center w-20 h-20 md:w-28 md:h-28 
+                                  bg-gradient-gold rounded-[1.5rem] md:rounded-[2.5rem] shadow-gold mb-4 md:mb-6 p-0.5 transform rotate-3 hover:rotate-0 transition-transform duration-500 shrink-0">
+                                    <div className="w-full h-full bg-white rounded-[1.4rem] md:rounded-[2.4rem] flex items-center justify-center">
+                                        <GraduationCap className="w-10 h-10 md:w-14 md:h-14 text-primary-500" />
+                                    </div>
+                                </div>
+                                <h1 className="text-3xl md:text-4xl font-black mb-2 md:mb-3 tracking-tight">
+                                    <span className="text-gold">{t('common.appName')}</span>
+                                </h1>
+                                <p className="text-slate-400 text-sm md:text-lg font-medium opacity-80">
+                                    {t('login.subtitle')}
+                                </p>
+                            </>
+                        )}
                     </div>
 
                     {/* Login Card */}
-                    <div className="card shadow-[0_20px_60px_-15px_rgba(212,175,55,0.15)]">
+                    <div className={cn(
+                        "card shadow-[0_20px_60px_-15px_rgba(212,175,55,0.15)] transition-all duration-500",
+                        isSuccess && "opacity-50 pointer-events-none scale-95 blur-[2px]"
+                    )}>
                         <div className="bg-white p-6 md:p-10">
                             <h2 className="text-xl md:text-2xl font-black text-slate-800 text-center mb-6 md:mb-8 tracking-wide uppercase">
                                 {t('login.title')}
