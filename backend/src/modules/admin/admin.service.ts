@@ -83,73 +83,93 @@ export class AdminService {
     // ===========================================
 
     async listStudents(params: ListParams) {
-        const page = Number(params.page) || 1;
-        const limit = Number(params.limit) || 20;
-        const { search, departmentId, status } = params;
-        const skip = (page - 1) * limit;
+        try {
+            this.logger.debug(`listStudents called with: ${JSON.stringify(params)}`);
+            const page = Number(params.page) || 1;
+            const limit = Number(params.limit) || 20;
+            const { search, departmentId, status } = params;
+            const skip = (page - 1) * limit;
 
-        const where: any = {
-            deletedAt: null,
-        };
+            const where: any = {
+                deletedAt: null,
+            };
 
-        if (search) {
-            where.OR = [
-                { fullNameAr: { contains: search, mode: 'insensitive' } },
-                { fullNameEn: { contains: search, mode: 'insensitive' } },
-                { email: { contains: search, mode: 'insensitive' } },
-            ];
-        }
+            if (search) {
+                where.OR = [
+                    { fullNameAr: { contains: search, mode: 'insensitive' } },
+                    { fullNameEn: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } },
+                ];
+            }
 
-        if (departmentId) {
-            where.departmentId = departmentId;
-        }
+            if (departmentId) {
+                where.departmentId = departmentId;
+            }
 
-        if (status) {
-            where.status = status;
-        }
+            if (status) {
+                where.status = status;
+            }
 
-        const [students, total] = await Promise.all([
-            this.prisma.student.findMany({
-                where,
-                skip,
-                take: limit,
-                include: {
-                    department: true,
-                    identifiers: {
-                        select: { registrationNumberPrefix: true },
+            this.logger.debug(`Executing student query with where: ${JSON.stringify(where)}`);
+
+            const [students, total] = await Promise.all([
+                this.prisma.student.findMany({
+                    where,
+                    skip,
+                    take: limit,
+                    include: {
+                        department: true,
+                        identifiers: {
+                            select: { registrationNumberPrefix: true },
+                        },
                     },
-                },
-                orderBy: { createdAt: 'desc' },
-            }),
-            this.prisma.student.count({ where }),
-        ]);
+                    orderBy: { createdAt: 'desc' },
+                }),
+                this.prisma.student.count({ where }),
+            ]);
 
-        return {
-            data: students.map((s: any) => ({
-                id: s.id,
-                fullNameAr: s.fullNameAr,
-                fullNameEn: s.fullNameEn,
-                registrationNumber: s.registrationNumber || s.identifiers[0]?.registrationNumberPrefix || 'N/A',
-                email: s.email,
-                dateOfBirth: s.dateOfBirth,
-                departmentId: s.departmentId,
-                status: s.status,
-                academicYear: s.academicYear,
-                semesterLevel: s.semesterLevel,
-                department: {
-                    id: s.department.id,
-                    code: s.department.code,
-                    nameAr: s.department.nameAr,
-                    nameEn: s.department.nameEn,
+            this.logger.debug(`Found ${students.length} students. Total: ${total}`);
+
+            const data = students.map((s: any) => {
+                try {
+                    return {
+                        id: s.id,
+                        fullNameAr: s.fullNameAr,
+                        fullNameEn: s.fullNameEn,
+                        registrationNumber: s.registrationNumber || s.identifiers[0]?.registrationNumberPrefix || 'N/A',
+                        email: s.email,
+                        dateOfBirth: s.dateOfBirth,
+                        departmentId: s.departmentId,
+                        status: s.status,
+                        academicYear: s.academicYear,
+                        semesterLevel: s.semesterLevel,
+                        department: {
+                            id: s.department?.id || 'N/A',
+                            code: s.department?.code || 'N/A',
+                            nameAr: s.department?.nameAr || 'N/A',
+                            nameEn: s.department?.nameEn || 'N/A',
+                        },
+                    };
+                } catch (mapError) {
+                    this.logger.error(`Error mapping student ${s.id}:`, mapError);
+                    return null;
+                }
+            }).filter(Boolean);
+
+            return {
+                data,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit),
                 },
-            })),
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-            },
-        };
+            };
+        } catch (error: any) {
+            this.logger.error('CRITICAL: listStudents failed:', error.message);
+            if (error.stack) this.logger.error(error.stack);
+            throw error;
+        }
     }
 
     async getStudentDetails(studentId: string) {

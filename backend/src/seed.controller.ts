@@ -133,19 +133,40 @@ export class SeedController {
                 },
             });
 
-            // Create admin role and admin user
-            const adminRole = await this.prisma.role.upsert({
-                where: { name: 'ADMIN' },
-                update: {},
-                create: {
-                    name: 'ADMIN',
-                    description: 'System Administrator',
-                },
-            });
+            // Create roles
+            const [adminRole, superAdminRole] = await Promise.all([
+                this.prisma.role.upsert({
+                    where: { name: 'ADMIN' },
+                    update: {},
+                    create: {
+                        name: 'ADMIN',
+                        description: 'System Administrator',
+                    },
+                }),
+                this.prisma.role.upsert({
+                    where: { name: 'SUPER_ADMIN' },
+                    update: {},
+                    create: {
+                        name: 'SUPER_ADMIN',
+                        description: 'Total Control Administrator',
+                    },
+                })
+            ]);
 
-            // Map permissions to role
+            // Map ALL permissions to SUPER_ADMIN role
             await Promise.all(
                 permissions.map(p =>
+                    this.prisma.rolePermission.upsert({
+                        where: { roleId_permissionId: { roleId: superAdminRole.id, permissionId: p.id } },
+                        update: {},
+                        create: { roleId: superAdminRole.id, permissionId: p.id }
+                    })
+                )
+            );
+
+            // Map partial permissions to ADMIN role (can be refined later)
+            await Promise.all(
+                permissions.filter(p => !p.name.includes('audit')).map(p =>
                     this.prisma.rolePermission.upsert({
                         where: { roleId_permissionId: { roleId: adminRole.id, permissionId: p.id } },
                         update: {},
@@ -167,14 +188,19 @@ export class SeedController {
                 },
             });
 
-            await this.prisma.adminUserRole.upsert({
-                where: { adminUserId_roleId: { adminUserId: adminUser.id, roleId: adminRole.id } },
-                update: {},
-                create: {
-                    adminUserId: adminUser.id,
-                    roleId: adminRole.id,
-                },
-            });
+            // Grant BOTH roles to admin user
+            await Promise.all([
+                this.prisma.adminUserRole.upsert({
+                    where: { adminUserId_roleId: { adminUserId: adminUser.id, roleId: adminRole.id } },
+                    update: {},
+                    create: { adminUserId: adminUser.id, roleId: adminRole.id },
+                }),
+                this.prisma.adminUserRole.upsert({
+                    where: { adminUserId_roleId: { adminUserId: adminUser.id, roleId: superAdminRole.id } },
+                    update: {},
+                    create: { adminUserId: adminUser.id, roleId: superAdminRole.id },
+                }),
+            ]);
 
             // Create sample student
             const studentPassword = await argon2.hash('ALNAHDA_2024_001234');
