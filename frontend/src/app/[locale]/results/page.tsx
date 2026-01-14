@@ -137,49 +137,49 @@ export default function ResultsPage() {
 
             {/* Header */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 no-print">
-                <div className="max-w-7xl mx-auto px-4 py-4">
+                <div className="max-w-7xl mx-auto px-4 py-3 md:py-4">
                     <div className="flex items-center justify-between">
                         {/* Logo */}
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gradient-gold rounded-2xl flex items-center justify-center shadow-gold p-0.5">
-                                <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-                                    <GraduationCap className="w-7 h-7 text-primary-500" />
+                        <div className="flex items-center gap-2 md:gap-4">
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-gold rounded-xl md:rounded-2xl flex items-center justify-center shadow-gold p-0.5 shrink-0">
+                                <div className="w-full h-full bg-white rounded-[10px] md:rounded-[14px] flex items-center justify-center">
+                                    <GraduationCap className="w-6 h-6 md:w-7 h-7 text-primary-500" />
                                 </div>
                             </div>
-                            <div>
-                                <h1 className="font-black text-xl tracking-tight text-slate-900">
+                            <div className="min-w-0">
+                                <h1 className="font-black text-base md:text-xl tracking-tight text-slate-900 truncate">
                                     {t('common.appName')}
                                 </h1>
-                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest leading-none mt-1">
+                                <p className="text-slate-400 text-[8px] md:text-xs font-black uppercase tracking-widest leading-none mt-0.5 truncate">
                                     {t('results.title')}
                                 </p>
                             </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5 md:gap-3">
                             <button
                                 onClick={toggleLocale}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 
-                         border border-slate-200 rounded-2xl transition-all font-bold text-xs tracking-widest text-slate-600 shadow-sm"
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white hover:bg-slate-50 
+                         border border-slate-200 rounded-xl md:rounded-2xl transition-all font-bold text-[10px] md:text-xs tracking-widest text-slate-600 shadow-sm shrink-0"
                             >
-                                <Globe className="w-4 h-4 text-primary-500" />
+                                <Globe className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary-500" />
                                 <span className="hidden sm:inline">{locale === 'ar' ? 'English' : 'العربية'}</span>
                             </button>
                             <button
                                 onClick={handlePrint}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 
-                         border border-slate-200 rounded-2xl transition-all font-bold text-xs tracking-widest text-slate-600 shadow-sm"
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white hover:bg-slate-50 
+                         border border-slate-200 rounded-xl md:rounded-2xl transition-all font-bold text-[10px] md:text-xs tracking-widest text-slate-600 shadow-sm shrink-0"
                             >
-                                <Printer className="w-4 h-4 text-primary-500" />
+                                <Printer className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary-500" />
                                 <span className="hidden sm:inline">{t('common.print')}</span>
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 
-                         border border-red-200 rounded-2xl transition-all font-bold text-xs tracking-widest text-red-600"
+                                className="flex items-center gap-2 px-3 md:px-4 py-2 bg-red-50 hover:bg-red-100 
+                         border border-red-200 rounded-xl md:rounded-2xl transition-all font-bold text-[10px] md:text-xs tracking-widest text-red-600 shrink-0"
                             >
-                                <LogOut className="w-4 h-4" />
+                                <LogOut className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                 <span className="hidden sm:inline">{t('common.logout')}</span>
                             </button>
                         </div>
@@ -271,21 +271,21 @@ export default function ResultsPage() {
 
                                 {/* GPA Summary */}
                                 {gpaSummary && (
-                                    <div className="text-center py-8 rounded-[2rem] bg-gradient-to-br from-slate-50 to-white border border-slate-100 shadow-xl relative overflow-hidden group">
+                                    <div className="text-center py-6 md:py-8 rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-br from-slate-50 to-white border border-slate-100 shadow-xl relative overflow-hidden group">
                                         <div className="absolute inset-0 bg-primary-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        <p className="gpa-label mb-2 text-slate-400 font-black tracking-widest text-[10px] uppercase">
+                                        <p className="gpa-label mb-1 md:mb-2 text-slate-400 font-black tracking-widest text-[8px] md:text-[10px] uppercase">
                                             {t('results.cumulativeGPA')}
                                         </p>
-                                        <p className="text-5xl font-black text-primary-600 tracking-tighter mb-4">
+                                        <p className="text-3xl md:text-5xl font-black text-primary-600 tracking-tighter mb-2 md:mb-4">
                                             {gpaSummary.cumulativeGPA.toFixed(4)}
                                         </p>
-                                        <div className="inline-flex px-4 py-1.5 bg-primary-50 rounded-full border border-primary-100 shadow-sm">
-                                            <p className="text-xs font-black text-primary-700 uppercase tracking-widest">
+                                        <div className="inline-flex px-3 md:px-4 py-1.5 bg-primary-50 rounded-full border border-primary-100 shadow-sm">
+                                            <p className="text-[10px] md:text-xs font-black text-primary-700 uppercase tracking-widest">
                                                 {isRTL ? gpaSummary.classificationAr : gpaSummary.classification}
                                             </p>
                                         </div>
-                                        <div className="mt-6 pt-6 border-t border-slate-100">
-                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+                                        <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-slate-100">
+                                            <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
                                                 {t('results.totalCredits')}: <span className="text-slate-900 font-black ml-1">{gpaSummary.totalCreditsEarned}</span>
                                             </p>
                                         </div>
@@ -344,37 +344,39 @@ export default function ResultsPage() {
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th className="!bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.courseCode')}</th>
-                                                <th className="!bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.courseName')}</th>
-                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.credits')}</th>
-                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.coursework')}</th>
-                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.finalExam')}</th>
-                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.totalScore')}</th>
-                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.grade')}</th>
-                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200">{t('results.status')}</th>
+                                                <th className="!bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.courseCode')}</th>
+                                                <th className="!bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.courseName')}</th>
+                                                <th className="hidden md:table-cell text-center !bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.credits')}</th>
+                                                <th className="hidden lg:table-cell text-center !bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.coursework')}</th>
+                                                <th className="hidden lg:table-cell text-center !bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.finalExam')}</th>
+                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.totalScore')}</th>
+                                                <th className="text-center !bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.grade')}</th>
+                                                <th className="hidden sm:table-cell text-center !bg-slate-50 !text-slate-600 border-b border-slate-200 text-[10px] md:text-sm">{t('results.status')}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {currentSemester.courses.map((course, index) => (
                                                 <tr key={index} className="border-b border-slate-100 transition-colors">
-                                                    <td className="font-mono text-sm text-slate-500" dir="ltr">
+                                                    <td className="font-mono text-[10px] md:text-sm text-slate-500 py-3 md:py-4 px-3 md:px-4" dir="ltr">
                                                         {course.courseCode}
                                                     </td>
-                                                    <td className="font-bold text-slate-900 whitespace-nowrap">
-                                                        {isRTL ? course.courseNameAr : course.courseNameEn}
+                                                    <td className="font-bold text-slate-900 text-xs md:text-sm py-3 md:py-4 px-3 md:px-4 min-w-[120px]">
+                                                        <span className="line-clamp-2 md:line-clamp-1">{isRTL ? course.courseNameAr : (course.courseNameEn || course.courseCode)}</span>
                                                     </td>
-                                                    <td className="text-center text-slate-600 font-medium">{course.units}</td>
-                                                    <td className="text-center text-slate-600 font-medium">{course.courseworkScore}</td>
-                                                    <td className="text-center text-slate-600 font-medium">{course.finalExamScore}</td>
-                                                    <td className="text-center font-black text-slate-900">{course.totalScore}</td>
-                                                    <td className="text-center">
-                                                        <span className={cn('grade-badge !rounded-lg !px-3 font-black text-xs', getGradeClass(course.letterGrade))}>
+                                                    <td className="hidden md:table-cell text-center text-slate-600 font-medium">{course.units}</td>
+                                                    <td className="hidden lg:table-cell text-center text-slate-600 font-medium">{course.courseworkScore}</td>
+                                                    <td className="hidden lg:table-cell text-center text-slate-600 font-medium">{course.finalExamScore}</td>
+                                                    <td className="text-center font-black text-slate-900 text-sm md:text-base py-3 md:py-4 px-3 md:px-4">
+                                                        {formatNumber(course.totalScore, locale, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                                                    </td>
+                                                    <td className="text-center py-3 md:py-4 px-3 md:px-4">
+                                                        <span className={cn('grade-badge !rounded-lg !px-2 md:!px-3 font-black text-[9px] md:text-xs', getGradeClass(course.letterGrade))}>
                                                             {isRTL ? (course.letterGradeAr || course.letterGrade) : course.letterGrade}
                                                         </span>
                                                     </td>
-                                                    <td className="text-center">
+                                                    <td className="hidden sm:table-cell text-center py-3 md:py-4 px-3 md:px-4">
                                                         <span className={cn(
-                                                            "font-black text-[10px] uppercase tracking-widest",
+                                                            "font-black text-[9px] md:text-[10px] uppercase tracking-widest",
                                                             course.passed ? 'text-emerald-600' : 'text-red-600'
                                                         )}>
                                                             {course.passed ? (isRTL ? 'ناجح' : 'Passed') : (isRTL ? 'راسب' : 'Failed')}
@@ -395,27 +397,27 @@ export default function ResultsPage() {
                             {currentSemester && (
                                 <div className="p-6 bg-slate-50 border-t border-slate-100">
                                     {currentSemester.summary ? (
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight">{t('results.totalCredits')}</span>
-                                                <span className="text-xl font-black text-slate-900">{currentSemester.summary.totalUnits}</span>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+                                            <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-1 p-3 md:p-0 bg-white md:bg-transparent rounded-xl md:rounded-none shadow-sm md:shadow-none border border-slate-100 md:border-0">
+                                                <span className="text-[8px] md:text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight shrink-0">{t('results.totalCredits')}</span>
+                                                <span className="text-base md:text-xl font-black text-slate-900 leading-none">{currentSemester.summary.totalUnits}</span>
                                             </div>
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight">{isRTL ? 'الوحدات المنجزة' : 'Completed Units'}</span>
-                                                <span className="text-xl font-black text-emerald-600">{currentSemester.summary.completedUnits}</span>
+                                            <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-1 p-3 md:p-0 bg-white md:bg-transparent rounded-xl md:rounded-none shadow-sm md:shadow-none border border-slate-100 md:border-0">
+                                                <span className="text-[8px] md:text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight shrink-0">{isRTL ? 'الوحدات المنجزة' : 'Completed Units'}</span>
+                                                <span className="text-base md:text-xl font-black text-emerald-600 leading-none">{currentSemester.summary.completedUnits}</span>
                                             </div>
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight">{isRTL ? 'المقررات غير المنجزة' : 'Incomplete Courses'}</span>
-                                                <span className="text-xl font-black text-red-600">{currentSemester.summary.incompleteCourses}</span>
+                                            <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-1 p-3 md:p-0 bg-white md:bg-transparent rounded-xl md:rounded-none shadow-sm md:shadow-none border border-slate-100 md:border-0">
+                                                <span className="text-[8px] md:text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight shrink-0">{isRTL ? 'المقررات غير المنجزة' : 'Incomplete'}</span>
+                                                <span className="text-base md:text-xl font-black text-red-600 leading-none">{currentSemester.summary.incompleteCourses}</span>
                                             </div>
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight">{t('results.semesterGPA')}</span>
-                                                <span className="text-xl font-black text-primary-600">{formatNumber(currentSemester.summary.gpa, locale, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</span>
+                                            <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-1 p-3 md:p-0 bg-white md:bg-transparent rounded-xl md:rounded-none shadow-sm md:shadow-none border border-slate-100 md:border-0 text-primary-600">
+                                                <span className="text-[8px] md:text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight shrink-0">{t('results.semesterGPA')}</span>
+                                                <span className="text-base md:text-xl font-black leading-none">{formatNumber(currentSemester.summary.gpa, locale, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</span>
                                             </div>
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight">{t('results.status')}</span>
+                                            <div className="flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-1 p-3 md:p-0 bg-white md:bg-transparent rounded-xl md:rounded-none shadow-sm md:shadow-none border border-slate-100 md:border-0">
+                                                <span className="text-[8px] md:text-[10px] text-slate-400 block uppercase font-black tracking-widest leading-tight shrink-0">{t('results.status')}</span>
                                                 <span className={cn(
-                                                    "text-lg font-black uppercase tracking-tighter",
+                                                    "text-sm md:text-lg font-black uppercase tracking-tighter leading-none",
                                                     currentSemester.summary.incompleteCourses === 0 ? "text-emerald-600" : "text-amber-600"
                                                 )}>
                                                     {isRTL ? currentSemester.summary.statusAr : (currentSemester.summary.incompleteCourses === 0 ? 'Passed' : 'Failed')}
@@ -423,7 +425,7 @@ export default function ResultsPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className="text-center text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                                        <p className="text-center text-slate-400 text-[8px] md:text-[10px] font-black uppercase tracking-widest">
                                             {isRTL ? 'جاري تحميل الملخص...' : 'Loading summary...'}
                                         </p>
                                     )}
