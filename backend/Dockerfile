@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install ALL dependencies (including devDependencies for build)
+# Install ALL dependencies
 RUN npm install
 
 # Copy source
@@ -20,7 +20,11 @@ RUN npx prisma generate
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine AS production
+# Switch to slim (Debian) for maximum compatibility with Prisma binaries
+FROM node:20-slim AS production
+
+# Install openssl and other mandatory libraries for Prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -50,5 +54,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD node -e "require('http').get('http://localhost:4000/api/v1/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
 # Final Start Command
-# Resilient start command that works whether Nest builds into /dist or /dist/src
 CMD ["sh", "-c", "if [ -f dist/main.js ]; then node dist/main.js; else node dist/src/main.js; fi"]
