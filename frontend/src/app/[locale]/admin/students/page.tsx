@@ -96,7 +96,8 @@ export default function StudentsPage() {
             setStudentToDelete(null);
         },
         onError: (error: any) => {
-            alert(isRTL ? "فشل حذف الطالب" : "Failed to delete student");
+            const message = error.message || (isRTL ? "فشل حذف الطالب" : "Failed to delete student");
+            alert(message);
             console.error(error);
         }
     });

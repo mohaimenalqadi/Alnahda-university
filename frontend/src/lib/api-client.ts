@@ -131,24 +131,40 @@ class ApiClient {
                 this.resetAuthState();
             }
 
+            if (response.status === 204) {
+                return null as any;
+            }
+
+            const contentType = response.headers.get('content-type');
             if (!response.ok) {
-                const errorData: ApiError = await response.json().catch(() => ({
-                    statusCode: response.status,
-                    message: 'An error occurred',
-                    error: response.statusText,
-                }));
+                let errorData: any;
+                try {
+                    errorData = contentType?.includes('application/json')
+                        ? await response.json()
+                        : { message: await response.text() || 'An error occurred' };
+                } catch {
+                    errorData = { message: 'An error occurred' };
+                }
 
                 throw new ApiRequestError(
-                    errorData.message,
-                    errorData.statusCode,
-                    errorData.error
+                    errorData.message || errorData.error || 'An error occurred',
+                    response.status,
+                    errorData.error || response.statusText
                 );
             }
 
-            return response.json();
+            if (contentType?.includes('application/json')) {
+                return response.json();
+            }
+
+            return response.text() as any;
         } catch (error) {
             if (error instanceof ApiRequestError) throw error;
-            throw new ApiRequestError('Network error', 0, 'NetworkError');
+            throw new ApiRequestError(
+                error instanceof Error ? error.message : 'Network error',
+                0,
+                'NetworkError'
+            );
         }
     }
 
