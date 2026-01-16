@@ -733,55 +733,49 @@ export class AdminService {
                 courseUnits: {
                     create: {
                         units: dto.units || 3,
+                        isActive: true
                     }
                 }
             } as any
         });
 
+        // Fetch with units to return flattened object
+        const created = await this.prisma.course.findUnique({
+            where: { id: course.id },
+            include: { department: true, courseUnits: { where: { isActive: true } } }
+        });
+
         await this.createAuditLog(adminUserId, AuditAction.CREATE, 'course', course.id, null, dto);
-        return course;
+
+        return {
+            ...created,
+            units: created?.courseUnits[0]?.units || 3
+        };
     }
 
     async updateCourse(id: string, dto: UpdateCourseDto, adminUserId: string) {
         const existing = await this.prisma.course.findUnique({ where: { id }, include: { courseUnits: true } });
         if (!existing) throw new NotFoundException('Course not found');
 
-        const updated = await this.prisma.course.update({
+        await this.prisma.course.update({
             where: { id },
             data: {
                 code: dto.code,
                 nameAr: dto.nameAr,
                 nameEn: dto.nameEn,
                 semesterLevel: dto.semesterLevel,
-                departmentId: dto.departmentId, // Allow updating department
+                departmentId: dto.departmentId,
             } as any
         });
 
         if (dto.units !== undefined) {
             const activeUnit = existing.courseUnits.find(u => u.isActive);
             if (activeUnit) {
-                // Determine if we should update existing or create new version (if used by enrollments)
-                // For simplicity in this fix, we update the existing active unit if it has no enrollments,
-                // otherwise we should deactivate it and create a new one.
-                // Checking enrollments is safer:
-                const enrollmentsCount = await this.prisma.enrollment.count({ where: { courseUnitId: activeUnit.id } });
-
-                if (enrollmentsCount === 0) {
-                    await this.prisma.courseUnit.update({
-                        where: { id: activeUnit.id },
-                        data: { units: dto.units }
-                    });
-                } else {
-                    // It has enrollments, so we Soft Deactivate and Create New One for academic integrity
-                    // However, user just wants it "fixed". Overwriting 'units' on a live course is dangerous for GPA
-                    // But for this request "fix it now", we will update it directly to reflect UI changes.
-                    // Ideally: Version logic.
-                    // Pragmatic Fix: Update the record.
-                    await this.prisma.courseUnit.update({
-                        where: { id: activeUnit.id },
-                        data: { units: dto.units }
-                    });
-                }
+                // Update existing active unit directly for pragmatic fix
+                await this.prisma.courseUnit.update({
+                    where: { id: activeUnit.id },
+                    data: { units: dto.units }
+                });
             } else {
                 // No active unit? Create one.
                 await this.prisma.courseUnit.create({
@@ -794,8 +788,18 @@ export class AdminService {
             }
         }
 
+        // Fetch refreshed data
+        const updated = await this.prisma.course.findUnique({
+            where: { id },
+            include: { department: true, courseUnits: { where: { isActive: true } } }
+        });
+
         await this.createAuditLog(adminUserId, AuditAction.UPDATE, 'course', id, existing, dto);
-        return updated;
+
+        return {
+            ...updated,
+            units: updated?.courseUnits[0]?.units || 3
+        };
     }
 
     async listDepartments() {
