@@ -188,6 +188,7 @@ export class StudentService {
             const ordinalAr = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر'];
             const levelNameAr = avgLevel <= ordinalAr.length ? `الفصل الدراسي ${ordinalAr[avgLevel - 1]}` : `الفصل الدراسي ${avgLevel}`;
 
+            const passedCourses = sem.courses.filter((c: any) => c.passed).length;
             const summary = {
                 totalUnits,
                 completedUnits: passedUnits,
@@ -195,7 +196,7 @@ export class StudentService {
                 incompleteCourses,
                 gpa: gpaResult.gpa,
                 classificationAr: gpaResult.classificationAr,
-                statusAr: incompleteCourses === 0 ? 'ناجح' : (incompleteCourses < 3 ? 'ناجح بمواد' : 'راسب'),
+                statusAr: incompleteCourses === 0 ? 'ناجح' : (incompleteCourses < 3 && passedCourses > 0 ? 'ناجح بمواد' : 'راسب'),
             };
 
             return {
@@ -240,6 +241,8 @@ export class StudentService {
 
         const allGrades: GradeResult[] = [];
         const allUnits: number[] = [];
+        let totalAttemptedUnits = 0;
+        let failedCoursesCount = 0;
 
         for (const semester of allResults) {
             for (const course of semester.courses) {
@@ -251,6 +254,10 @@ export class StudentService {
                     passed: course.passed,
                 });
                 allUnits.push(course.units);
+                totalAttemptedUnits += course.units;
+                if (!course.passed) {
+                    failedCoursesCount++;
+                }
             }
         }
 
@@ -264,11 +271,23 @@ export class StudentService {
             credits: s.summary?.totalUnits || 0,
         }));
 
+        // Custom Status Logic
+        let classificationAr = cumulativeGPA.classificationAr;
+        const passedCoursesCount = allGrades.filter(g => g.passed).length;
+
+        if (allGrades.length > 0) {
+            if (passedCoursesCount === 0 || failedCoursesCount >= 3) {
+                classificationAr = 'راسب';
+            } else if (failedCoursesCount > 0) {
+                classificationAr = 'ناجح بمواد';
+            }
+        }
+
         return {
             cumulativeGPA: cumulativeGPA.gpa,
-            totalCreditsEarned: cumulativeGPA.totalCredits,
+            totalCreditsEarned: totalAttemptedUnits, // User wants to see Total Registered/Attempted Units
             classification: cumulativeGPA.classification,
-            classificationAr: cumulativeGPA.classificationAr,
+            classificationAr: classificationAr,
             semesterGPAs,
             gradingScale: this.gpaCalculator.getGradingScale(),
         };
