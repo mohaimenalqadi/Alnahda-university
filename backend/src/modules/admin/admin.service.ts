@@ -833,6 +833,47 @@ export class AdminService {
         return updated;
     }
 
+    async deleteDepartment(id: string, adminUserId: string) {
+        const existing = await this.prisma.department.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: { students: true, courses: true }
+                }
+            }
+        });
+
+        if (!existing) throw new NotFoundException('Department not found');
+
+        if (existing._count.students > 0 || existing._count.courses > 0) {
+            throw new BadRequestException('Cannot delete department with existing students or courses');
+        }
+
+        await this.prisma.department.delete({ where: { id } });
+        await this.createAuditLog(adminUserId, AuditAction.DELETE, 'department', id, existing, null);
+    }
+
+    async deleteCourse(id: string, adminUserId: string) {
+        const existing = await this.prisma.course.findUnique({
+            where: { id },
+            include: { courseUnits: { include: { _count: { select: { enrollments: true } } } } }
+        });
+
+        if (!existing) throw new NotFoundException('Course not found');
+
+        // Check if any unit has enrollments
+        const hasEnrollments = existing.courseUnits.some(u => u._count.enrollments > 0);
+        if (hasEnrollments) {
+            throw new BadRequestException('Cannot delete course with active student enrollments');
+        }
+
+        // Hard delete: First delete units, then course
+        await this.prisma.courseUnit.deleteMany({ where: { courseId: id } });
+        await this.prisma.course.delete({ where: { id } });
+
+        await this.createAuditLog(adminUserId, AuditAction.DELETE, 'course', id, existing, null);
+    }
+
     // ===========================================
     // Audit Logs
     // ===========================================

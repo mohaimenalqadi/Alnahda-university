@@ -265,11 +265,20 @@ export class AdminController {
         return this.adminService.createDepartment(dto, user.sub);
     }
 
-    @Patch('departments/:id')
+    @Delete('departments/:id')
     @Roles('ADMIN', 'SUPER_ADMIN')
-    @ApiOperation({ summary: 'Update a department' })
-    async updateDepartment(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateDepartmentDto, @CurrentUser() user: TokenPayload) {
-        return this.adminService.updateDepartment(id, dto, user.sub);
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete a department' })
+    async deleteDepartment(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: TokenPayload) {
+        return this.adminService.deleteDepartment(id, user.sub);
+    }
+
+    @Delete('courses/:id')
+    @Roles('ADMIN', 'SUPER_ADMIN')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete a course' })
+    async deleteCourse(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: TokenPayload) {
+        return this.adminService.deleteCourse(id, user.sub);
     }
 
     // ===========================================

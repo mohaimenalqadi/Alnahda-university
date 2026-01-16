@@ -406,6 +406,12 @@ class ApiClient {
         });
     }
 
+    async deleteDepartment(id: string) {
+        return this.request<any>(`/api/v1/admin/departments/${id}`, {
+            method: 'DELETE',
+        });
+    }
+
     async getAdminDepartments() {
         return this.request<any[]>('/api/v1/admin/departments');
     }
@@ -446,6 +452,12 @@ class ApiClient {
         if (departmentId) query.append('departmentId', departmentId);
         if (semesterLevel) query.append('semesterLevel', semesterLevel.toString());
         return this.request<any[]>(`/api/v1/admin/courses?${query.toString()}`);
+    }
+
+    async deleteCourse(id: string) {
+        return this.request<any>(`/api/v1/admin/courses/${id}`, {
+            method: 'DELETE',
+        });
     }
 
     async deleteEnrollment(id: string) {

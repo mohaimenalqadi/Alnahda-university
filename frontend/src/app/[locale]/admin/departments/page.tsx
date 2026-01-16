@@ -15,13 +15,16 @@ import {
     Loader2,
     Plus,
     Building2,
-    Search
+    Search,
+    Trash2
 } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import DepartmentFormModal from '@/components/departments/DepartmentFormModal';
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function DepartmentsPage() {
     const t = useTranslations('admin.departments');
@@ -31,6 +34,11 @@ export default function DepartmentsPage() {
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingDepartment, setEditingDepartment] = useState<any>(null);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [departmentToDelete, setDepartmentToDelete] = useState<any>(null);
+
+    const queryClient = useQueryClient();
 
     const openCreateForm = () => {
         setEditingDepartment(null);
@@ -47,6 +55,32 @@ export default function DepartmentsPage() {
         queryKey: ['admin-departments'],
         queryFn: () => api.getAdminDepartments(),
     });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => api.deleteDepartment(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-departments'] });
+            setIsDeleteModalOpen(false);
+            setDepartmentToDelete(null);
+        },
+        onError: (error: any) => {
+            const message = error.message || (isRTL ? "فشل حذف القسم. تأكد من خلوه من الطلاب والمقررات." : "Failed to delete department. Ensure it has no students or courses.");
+            alert(message);
+            console.error(error);
+        }
+    });
+
+    const handleDeleteClick = (e: React.MouseEvent, dept: any) => {
+        e.stopPropagation();
+        setDepartmentToDelete(dept);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (departmentToDelete) {
+            deleteMutation.mutate(departmentToDelete.id);
+        }
+    };
 
     const universityDepartments = departments || [];
 
@@ -104,9 +138,18 @@ export default function DepartmentsPage() {
                                     <div className="p-3 bg-slate-800 rounded-2xl group-hover:bg-emerald-500/10 transition-colors duration-300">
                                         <Building2 className="w-6 h-6 text-emerald-500" />
                                     </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                        <Hash className="w-3 h-3" />
-                                        {dept.code}
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                            <Hash className="w-3 h-3" />
+                                            {dept.code}
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDeleteClick(e, dept)}
+                                            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all"
+                                            title={isRTL ? 'حذف' : 'Delete'}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </div>
 
@@ -135,6 +178,21 @@ export default function DepartmentsPage() {
                 onClose={() => setIsFormOpen(false)}
                 department={editingDepartment}
                 locale={locale}
+            />
+
+            {/* Confirm Delete Modal */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                isLoading={deleteMutation.isPending}
+                title={isRTL ? 'تأكيد حذف القسم' : 'Confirm Department Deletion'}
+                message={isRTL
+                    ? `هل أنت متأكد من حذف قسم ${departmentToDelete?.nameAr || ''} نهائياً؟`
+                    : `Are you sure you want to permanently delete the ${departmentToDelete?.nameEn || ''} department?`
+                }
+                confirmText={isRTL ? 'حذف' : 'Delete'}
+                cancelText={isRTL ? 'إلغاء' : 'Cancel'}
             />
         </div>
     );

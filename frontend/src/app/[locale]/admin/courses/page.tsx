@@ -15,13 +15,16 @@ import {
     Plus,
     Building2,
     Search,
-    Filter
+    Filter,
+    Trash2
 } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import CourseFormModal from '@/components/departments/CourseFormModal';
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function CoursesPage() {
     const t = useTranslations('admin.gradeManagement');
@@ -34,6 +37,11 @@ export default function CoursesPage() {
     const [departmentId, setDepartmentId] = useState<string>('');
     const [semesterLevel, setSemesterLevel] = useState<number | ''>('');
     const [searchQuery, setSearchQuery] = useState('');
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [courseToDelete, setCourseToDelete] = useState<any>(null);
+
+    const queryClient = useQueryClient();
 
     const openCreateForm = () => {
         setEditingCourse(null);
@@ -50,6 +58,32 @@ export default function CoursesPage() {
         queryKey: ['admin-courses', departmentId, semesterLevel],
         queryFn: () => api.getAdminCourses(departmentId || undefined, semesterLevel as number || undefined),
     });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => api.deleteCourse(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+            setIsDeleteModalOpen(false);
+            setCourseToDelete(null);
+        },
+        onError: (error: any) => {
+            const message = error.message || (isRTL ? "فشل حذف المقرر. قد يكون مرتبطاً بطلاب مسجلين." : "Failed to delete course. It might be linked to enrolled students.");
+            alert(message);
+            console.error(error);
+        }
+    });
+
+    const handleDeleteClick = (e: React.MouseEvent, course: any) => {
+        e.stopPropagation();
+        setCourseToDelete(course);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (courseToDelete) {
+            deleteMutation.mutate(courseToDelete.id);
+        }
+    };
 
     const { data: departments } = useQuery({
         queryKey: ['admin-departments'],
@@ -156,8 +190,17 @@ export default function CoursesPage() {
                                             {course.code}
                                         </span>
                                     </div>
-                                    <div className="px-3 py-1 bg-white/5 rounded-full border border-white/5 text-[10px] font-black text-blue-400 uppercase tracking-widest">
-                                        {course.units} Units
+                                    <div className="flex items-center gap-2">
+                                        <div className="px-3 py-1 bg-white/5 rounded-full border border-white/5 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                                            {course.units} Units
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleDeleteClick(e, course)}
+                                            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all"
+                                            title={isRTL ? 'حذف' : 'Delete'}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </div>
 
@@ -192,6 +235,21 @@ export default function CoursesPage() {
                 onClose={() => setIsFormOpen(false)}
                 course={editingCourse}
                 locale={locale}
+            />
+
+            {/* Confirm Delete Modal */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                isLoading={deleteMutation.isPending}
+                title={isRTL ? 'تأكيد حذف المقرر' : 'Confirm Course Deletion'}
+                message={isRTL
+                    ? `هل أنت متأكد من حذف مقرر ${courseToDelete?.nameAr || ''} (${courseToDelete?.code || ''}) نهائياً؟`
+                    : `Are you sure you want to permanently delete ${courseToDelete?.nameEn || ''} (${courseToDelete?.code || ''})?`
+                }
+                confirmText={isRTL ? 'حذف' : 'Delete'}
+                cancelText={isRTL ? 'إلغاء' : 'Cancel'}
             />
         </div>
     );

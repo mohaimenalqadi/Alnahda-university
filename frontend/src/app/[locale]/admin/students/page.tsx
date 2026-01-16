@@ -20,13 +20,16 @@ import {
     ChevronRight,
     UserPlus,
     X,
-    FilterX
+    FilterX,
+    Trash2
 } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { useParams } from 'next/navigation';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import StudentDetailModal from '@/components/students/StudentDetailModal';
 import StudentFormModal from '@/components/students/StudentFormModal';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 export default function StudentsPage() {
     const t = useTranslations('admin.students');
@@ -46,6 +49,11 @@ export default function StudentsPage() {
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingStudent, setEditingStudent] = useState<any>(null);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState<any>(null);
+
+    const queryClient = useQueryClient();
 
     const openDetails = (id: string) => {
         setSelectedStudentId(id);
@@ -79,6 +87,30 @@ export default function StudentsPage() {
         }),
         placeholderData: (previous) => previous, // Keep old data while fetching
     });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => api.deleteStudent(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin-students'] });
+            setIsDeleteModalOpen(false);
+            setStudentToDelete(null);
+        },
+        onError: (error: any) => {
+            alert(isRTL ? "فشل حذف الطالب" : "Failed to delete student");
+            console.error(error);
+        }
+    });
+
+    const handleDeleteClick = (student: any) => {
+        setStudentToDelete(student);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (studentToDelete) {
+            deleteMutation.mutate(studentToDelete.id);
+        }
+    };
 
     const students = studentsData?.data || [];
     const pagination = studentsData?.pagination;
@@ -250,6 +282,13 @@ export default function StudentsPage() {
                                                 >
                                                     <Edit2 className="w-4 h-4" />
                                                 </button>
+                                                <button
+                                                    onClick={() => handleDeleteClick(student)}
+                                                    className="p-1.5 md:p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-lg transition-all"
+                                                    title={isRTL ? 'حذف' : 'Delete'}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
                                                 <div className="hidden md:block w-px h-4 bg-white/10 mx-1" />
                                                 <button className="hidden md:block p-1.5 md:p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                                                     <MoreHorizontal className="w-4 h-4" />
@@ -322,6 +361,21 @@ export default function StudentsPage() {
                 student={editingStudent}
                 departments={departments}
                 locale={locale}
+            />
+
+            {/* Confirm Delete Modal */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                isLoading={deleteMutation.isPending}
+                title={isRTL ? 'تأكيد الحذف' : 'Confirm Deletion'}
+                message={isRTL
+                    ? `هل أنت متأكد من حذف الطالب ${studentToDelete?.fullNameAr || ''}؟ سيؤدي ذلك إلى تعطيل حسابه.`
+                    : `Are you sure you want to delete student ${studentToDelete?.fullNameEn || ''}? This will deactivate their account.`
+                }
+                confirmText={isRTL ? 'حذف' : 'Delete'}
+                cancelText={isRTL ? 'إلغاء' : 'Cancel'}
             />
         </div>
     );
