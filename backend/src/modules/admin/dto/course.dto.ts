@@ -55,6 +55,11 @@ export class UpdateCourseDto {
 
     @ApiPropertyOptional()
     @IsOptional()
+    @IsUUID()
+    departmentId?: string;
+
+    @ApiPropertyOptional()
+    @IsOptional()
     @IsInt()
     units?: number;
 }

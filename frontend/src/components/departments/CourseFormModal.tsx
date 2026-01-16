@@ -65,9 +65,7 @@ export default function CourseFormModal({ isOpen, onClose, course, locale }: Cou
     const mutation = useMutation({
         mutationFn: async (data: any) => {
             if (course) {
-                // Backend forbids updating departmentId, so we must exclude it
-                const { departmentId, ...updateData } = data;
-                return api.updateCourse(course.id, updateData);
+                return api.updateCourse(course.id, data);
             } else {
                 return api.createCourse(data);
             }
