@@ -211,7 +211,7 @@ model Grade {
   courseworkScore Decimal   @map("coursework_score") @db.Decimal(5, 2)
   finalExamScore  Decimal   @map("final_exam_score") @db.Decimal(5, 2)
   totalScore      Decimal   @map("total_score") @db.Decimal(5, 2)
-  letterGrade     String    @map("letter_grade") @db.VarChar(20)
+  letterGrade     String    @map("letter_grade") @db.VarChar(50)
   gradePoints     Decimal   @map("grade_points") @db.Decimal(3, 2)
   isPublished     Boolean   @default(false) @map("is_published")
   createdById     String    @map("created_by_id") @db.Uuid
@@ -237,7 +237,7 @@ model GradeHistory {
   courseworkScore Decimal  @map("coursework_score") @db.Decimal(5, 2)
   finalExamScore  Decimal  @map("final_exam_score") @db.Decimal(5, 2)
   totalScore      Decimal  @map("total_score") @db.Decimal(5, 2)
-  letterGrade     String   @map("letter_grade") @db.VarChar(20)
+  letterGrade     String   @map("letter_grade") @db.VarChar(50)
   gradePoints     Decimal  @map("grade_points") @db.Decimal(3, 2)
   changedById     String   @map("changed_by_id") @db.Uuid
   changeReason    String?  @map("change_reason") @db.VarChar(500)
