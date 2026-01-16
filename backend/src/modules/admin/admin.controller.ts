@@ -107,8 +107,9 @@ export class AdminController {
         return this.adminService.updateStudent(id, dto, user.sub);
     }
 
+    @Delete('students/:id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    @Roles('SUPER_ADMIN')
+    @Roles('SUPER_ADMIN', 'ADMIN')
     @ApiOperation({ summary: 'Delete a student' })
     async deleteStudent(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: TokenPayload) {
         return this.adminService.deleteStudent(id, user.sub);
