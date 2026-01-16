@@ -709,7 +709,7 @@ export class AdminService {
     }
 
     async listCourses(departmentId?: string, semesterLevel?: number) {
-        return this.prisma.course.findMany({
+        const courses = await this.prisma.course.findMany({
             where: {
                 ...(departmentId ? { departmentId } : {}),
                 ...(semesterLevel ? { semesterLevel: Number(semesterLevel) } : {}),
@@ -720,6 +720,12 @@ export class AdminService {
             },
             orderBy: [{ semesterLevel: 'asc' }, { code: 'asc' }] as any,
         });
+
+        // Flatten units for frontend consistency
+        return courses.map(course => ({
+            ...course,
+            units: course.courseUnits[0]?.units || 3
+        }));
     }
 
     async createCourse(dto: CreateCourseDto, adminUserId: string) {
